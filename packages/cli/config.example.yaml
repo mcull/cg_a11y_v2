@@ -1,0 +1,26 @@
+# Page type classification patterns
+pageTypes:
+  - pattern: "/artists/*"
+    type: "Artist Page"
+  - pattern: "/artworks/*"
+    type: "Artwork Page"
+  - pattern: "/blog/*"
+    type: "Blog Post"
+  - pattern: "/exhibitions/*"
+    type: "Exhibition Page"
+  - pattern: "/*"
+    type: "Other"
+
+# Adaptive sampling configuration
+sampling:
+  initialSampleSize: 10
+  maxSampleSize: 50
+  consistencyThreshold: 0.9
+
+# Testing configuration
+testing:
+  concurrency: 3
+  timeout: 30000
+  viewport:
+    width: 1920
+    height: 1080
