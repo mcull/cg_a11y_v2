@@ -10,15 +10,22 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:db": "ts-node src/database/test-connection.ts"
   },
-  "keywords": ["accessibility", "a11y", "audit", "wcag"],
+  "keywords": [
+    "accessibility",
+    "a11y",
+    "audit",
+    "wcag"
+  ],
   "author": "Marc Cull",
   "license": "MIT",
   "dependencies": {
     "@axe-core/puppeteer": "^4.8.0",
     "@supabase/supabase-js": "^2.39.0",
     "commander": "^11.1.0",
+    "dotenv": "^17.2.3",
     "fast-xml-parser": "^4.3.0",
     "pa11y": "^8.0.0",
     "puppeteer": "^21.6.0",
