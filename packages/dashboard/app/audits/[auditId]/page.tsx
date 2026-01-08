@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getSupabaseClient } from '@/lib/supabase';
 import { StatusBadge } from '@/components/audits/status-badge';
+
+export const dynamic = 'force-dynamic';
 import {
   Card,
   CardContent,
@@ -130,7 +132,7 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
                     <TableCell>
                       {Array.isArray(pageType.violations)
                         ? pageType.violations.length
-                        : pageType.violations?.count || 0}
+                        : (pageType.violations as any)?.count || 0}
                     </TableCell>
                   </TableRow>
                 ))}

@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase';
 import { AuditFilters } from '@/components/audits/audit-filters';
 import { StatusBadge } from '@/components/audits/status-badge';
+
+export const dynamic = 'force-dynamic';
 import {
   Table,
   TableBody,

@@ -4,6 +4,8 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { ClassificationBadge } from '@/components/violations/classification-badge';
 import { ClassificationButtons } from '@/components/violations/classification-buttons';
 import { Badge } from '@/components/ui/badge';
+
+export const dynamic = 'force-dynamic';
 import {
   Card,
   CardContent,
@@ -62,9 +64,9 @@ export default async function ViolationsPage({ params }: ViolationsPageProps) {
     throw new Error(`Failed to fetch violations: ${violationsError.message}`);
   }
 
-  const severityOrder = { critical: 1, serious: 2, moderate: 3, minor: 4 };
+  const severityOrder: Record<string, number> = { critical: 1, serious: 2, moderate: 3, minor: 4 };
   const sortedViolations = violations?.sort(
-    (a, b) => severityOrder[a.severity] - severityOrder[b.severity]
+    (a, b) => (severityOrder[a.severity] || 99) - (severityOrder[b.severity] || 99)
   );
 
   return (
@@ -170,7 +172,7 @@ export default async function ViolationsPage({ params }: ViolationsPageProps) {
                               </AccordionTrigger>
                               <AccordionContent>
                                 <div className="space-y-4">
-                                  {violation.violation_examples.map((example, idx) => (
+                                  {violation.violation_examples.map((example: any, idx: number) => (
                                     <div
                                       key={idx}
                                       className="border-l-2 border-muted pl-4"
