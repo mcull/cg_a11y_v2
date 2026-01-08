@@ -8,6 +8,7 @@ import { PageTypeAggregator } from '../classifier/aggregator';
 import { AdaptiveSampler } from '../sampling/sampler';
 import { AuditRunner } from '../services/audit-runner';
 import { AuditRepository } from '../database/repositories/audit-repository';
+import { autoClassify } from '../classification/heuristics';
 
 // Load environment variables
 dotenv.config();
@@ -161,7 +162,7 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
 
         // Save unique violations for this page type
         for (const [violationId, violation] of violationMap) {
-          await repository.saveViolation({
+          const savedViolation = await repository.saveViolation({
             audit_id: auditId,
             page_type_id: savedPageType.id,
             rule_id: violation.id,
@@ -173,6 +174,16 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
             extrapolated_total: Math.round((violation.instances / pageType.urls.length) * pageType.totalCount),
             remediation_guidance: violation.helpUrl || null,
           });
+
+          // Auto-classify violation
+          const classification = autoClassify(violation.id);
+          if (classification.category) {
+            await repository.createClassification({
+              violation_id: savedViolation.id,
+              category: classification.category,
+              auto_classified: true,
+            });
+          }
         }
       }
 

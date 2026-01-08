@@ -52,6 +52,7 @@ CREATE TABLE classifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   violation_id UUID NOT NULL REFERENCES violations(id) ON DELETE CASCADE,
   category TEXT NOT NULL CHECK (category IN ('content', 'structural')),
+  auto_classified BOOLEAN DEFAULT FALSE,
   notes TEXT,
   classified_by UUID, -- Will reference users table when auth is added
   classified_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -75,6 +76,7 @@ CREATE INDEX idx_violations_page_type ON violations(page_type_id);
 CREATE INDEX idx_violations_severity ON violations(severity);
 CREATE INDEX idx_violation_examples_violation ON violation_examples(violation_id);
 CREATE INDEX idx_classifications_violation ON classifications(violation_id);
+CREATE INDEX idx_classifications_auto_classified ON classifications(auto_classified);
 CREATE INDEX idx_asana_exports_violation ON asana_exports(violation_id);
 
 -- Updated at trigger function
