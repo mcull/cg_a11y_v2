@@ -1,0 +1,93 @@
+import Link from 'next/link';
+import { getSupabaseClient } from '@/lib/supabase';
+import { AuditFilters } from '@/components/audits/audit-filters';
+import { StatusBadge } from '@/components/audits/status-badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
+interface AuditsPageProps {
+  searchParams: {
+    status?: string;
+    sort?: string;
+  };
+}
+
+export default async function AuditsPage({ searchParams }: AuditsPageProps) {
+  const supabase = getSupabaseClient();
+
+  // Build query with filters
+  let query = supabase
+    .from('audits')
+    .select('id, timestamp, status, duration_seconds, total_violations')
+    .order('timestamp', { ascending: searchParams.sort === 'oldest' });
+
+  if (searchParams.status && searchParams.status !== 'all') {
+    query = query.eq('status', searchParams.status);
+  }
+
+  const { data: audits, error } = await query;
+
+  if (error) {
+    throw new Error(`Failed to fetch audits: ${error.message}`);
+  }
+
+  return (
+    <div className="container mx-auto py-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Accessibility Audits</CardTitle>
+          <CardDescription>View and explore past audit results</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            <AuditFilters />
+          </div>
+
+          {audits && audits.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Timestamp</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Total Violations</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {audits.map((audit) => (
+                  <TableRow key={audit.id}>
+                    <TableCell>
+                      <Link
+                        href={`/audits/${audit.id}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        {new Date(audit.timestamp).toLocaleString()}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={audit.status} />
+                    </TableCell>
+                    <TableCell>{audit.duration_seconds || 0}s</TableCell>
+                    <TableCell>{audit.total_violations || 0}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <p>No audits found.</p>
+              <p className="text-sm mt-2">Run your first audit with the CLI to get started.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
