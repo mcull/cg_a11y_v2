@@ -75,4 +75,59 @@ export class AdaptiveSampler {
     // Otherwise, continue sampling
     return true;
   }
+
+  async sample<T>(
+    items: T[],
+    testFn: (item: T) => Promise<string[]>
+  ): Promise<{
+    samplesTaken: number;
+    violations: Set<string>;
+    isConsistent: boolean;
+  }> {
+    const violationSets: string[][] = [];
+    const allViolations = new Set<string>();
+    let sampledCount = 0;
+    let isConsistent = false;
+
+    // Initial sample
+    const initialSample = this.getInitialSample(items.map((_, i) => i.toString()));
+    for (const indexStr of initialSample) {
+      const index = parseInt(indexStr);
+      const violations = await testFn(items[index]);
+      violationSets.push(violations);
+      violations.forEach((v) => allViolations.add(v));
+      sampledCount++;
+    }
+
+    // Check if consistent
+    isConsistent = this.areViolationsConsistent(violationSets);
+
+    // Continue sampling if needed
+    while (this.shouldContinueSampling(items.length, sampledCount, isConsistent)) {
+      const additionalSample = this.getAdditionalSample(
+        items.map((_, i) => i.toString()),
+        sampledCount
+      );
+
+      if (additionalSample.length === 0) {
+        break;
+      }
+
+      for (const indexStr of additionalSample) {
+        const index = parseInt(indexStr);
+        const violations = await testFn(items[index]);
+        violationSets.push(violations);
+        violations.forEach((v) => allViolations.add(v));
+        sampledCount++;
+      }
+
+      isConsistent = this.areViolationsConsistent(violationSets);
+    }
+
+    return {
+      samplesTaken: sampledCount,
+      violations: allViolations,
+      isConsistent,
+    };
+  }
 }
