@@ -21,20 +21,21 @@ import {
 } from '@/components/ui/accordion';
 
 interface ViolationsPageProps {
-  params: {
+  params: Promise<{
     auditId: string;
     pageTypeId: string;
-  };
+  }>;
 }
 
 export default async function ViolationsPage({ params }: ViolationsPageProps) {
+  const { auditId, pageTypeId } = await params;
   const supabase = getSupabaseClient();
 
   // Fetch page type info
   const { data: pageType, error: pageTypeError } = await supabase
     .from('page_types')
     .select('*')
-    .eq('id', params.pageTypeId)
+    .eq('id', pageTypeId)
     .single();
 
   if (pageTypeError || !pageType) {
@@ -57,7 +58,7 @@ export default async function ViolationsPage({ params }: ViolationsPageProps) {
         css_selector
       )
     `)
-    .eq('page_type_id', params.pageTypeId)
+    .eq('page_type_id', pageTypeId)
     .order('severity', { ascending: true });
 
   if (violationsError) {
@@ -77,7 +78,7 @@ export default async function ViolationsPage({ params }: ViolationsPageProps) {
           Audits
         </Link>
         {' / '}
-        <Link href={`/audits/${params.auditId}`} className="hover:underline">
+        <Link href={`/audits/${auditId}`} className="hover:underline">
           Audit Details
         </Link>
         {' / '}

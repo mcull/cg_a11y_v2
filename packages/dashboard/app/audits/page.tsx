@@ -15,23 +15,24 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface AuditsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     status?: string;
     sort?: string;
-  };
+  }>;
 }
 
 export default async function AuditsPage({ searchParams }: AuditsPageProps) {
+  const { status, sort } = await searchParams;
   const supabase = getSupabaseClient();
 
   // Build query with filters
   let query = supabase
     .from('audits')
     .select('id, timestamp, status, duration_seconds, total_violations')
-    .order('timestamp', { ascending: searchParams.sort === 'oldest' });
+    .order('timestamp', { ascending: sort === 'oldest' });
 
-  if (searchParams.status && searchParams.status !== 'all') {
-    query = query.eq('status', searchParams.status);
+  if (status && status !== 'all') {
+    query = query.eq('status', status);
   }
 
   const { data: audits, error } = await query;

@@ -21,19 +21,20 @@ import {
 } from '@/components/ui/table';
 
 interface AuditDetailPageProps {
-  params: {
+  params: Promise<{
     auditId: string;
-  };
+  }>;
 }
 
 export default async function AuditDetailPage({ params }: AuditDetailPageProps) {
+  const { auditId } = await params;
   const supabase = getSupabaseClient();
 
   // Fetch audit details
   const { data: audit, error: auditError } = await supabase
     .from('audits')
     .select('*')
-    .eq('id', params.auditId)
+    .eq('id', auditId)
     .single();
 
   if (auditError || !audit) {
@@ -51,7 +52,7 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
       pages_sampled,
       violations (count)
     `)
-    .eq('audit_id', params.auditId);
+    .eq('audit_id', auditId);
 
   if (pageTypesError) {
     throw new Error(`Failed to fetch page types: ${pageTypesError.message}`);
@@ -118,7 +119,7 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
                   <TableRow key={pageType.id}>
                     <TableCell>
                       <Link
-                        href={`/audits/${params.auditId}/page-types/${pageType.id}`}
+                        href={`/audits/${auditId}/page-types/${pageType.id}`}
                         className="text-blue-600 hover:underline font-medium"
                       >
                         {pageType.type_name}
