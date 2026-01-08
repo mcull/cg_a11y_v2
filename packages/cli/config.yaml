@@ -1,0 +1,50 @@
+pageTypes:
+  # Artist pages - appears to be the largest category
+  - pattern: "/artist/*"
+    type: "Artist Page"
+
+  # Exhibition/Show pages
+  - pattern: "/show/*"
+    type: "Exhibition Page"
+
+  # Blog posts and news
+  - pattern: "/post/*"
+    type: "Blog Post"
+
+  # Product category pages
+  - pattern: "/products*"
+    type: "Product Page"
+  - pattern: "/wall-art*"
+    type: "Product Page"
+  - pattern: "/fashion*"
+    type: "Product Page"
+  - pattern: "/jewelry*"
+    type: "Product Page"
+  - pattern: "/sculpture*"
+    type: "Product Page"
+
+  # Main navigation pages (static content)
+  - pattern: "/about"
+    type: "Static Page"
+  - pattern: "/shop"
+    type: "Static Page"
+  - pattern: "/get-involved"
+    type: "Static Page"
+  - pattern: "/artists"
+    type: "Static Page"
+  - pattern: "/exhibitions"
+    type: "Static Page"
+  - pattern: "/news--events"
+    type: "Static Page"
+  - pattern: "/visit"
+    type: "Static Page"
+  - pattern: "/contact"
+    type: "Static Page"
+  - pattern: "/accessibility"
+    type: "Static Page"
+  - pattern: "/press-room"
+    type: "Static Page"
+
+  # Catch-all for everything else
+  - pattern: "/*"
+    type: "Other"
