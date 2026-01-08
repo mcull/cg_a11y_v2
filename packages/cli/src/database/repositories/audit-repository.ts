@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Audit } from '../types';
+import { Audit, PageType, Violation } from '../types';
 
 export class AuditRepository {
   private client: SupabaseClient;
@@ -79,5 +79,50 @@ export class AuditRepository {
     }
 
     return audit;
+  }
+
+  async savePageType(data: Omit<PageType, 'id' | 'created_at'>): Promise<PageType> {
+    const { data: pageType, error } = await this.client
+      .from('page_types')
+      .insert([{
+        audit_id: data.audit_id,
+        type_name: data.type_name,
+        url_pattern: data.url_pattern,
+        total_count_in_sitemap: data.total_count_in_sitemap,
+        pages_sampled: data.pages_sampled,
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to save page type: ${error.message}`);
+    }
+
+    return pageType;
+  }
+
+  async saveViolation(data: Omit<Violation, 'id' | 'created_at'>): Promise<Violation> {
+    const { data: violation, error } = await this.client
+      .from('violations')
+      .insert([{
+        audit_id: data.audit_id,
+        page_type_id: data.page_type_id,
+        rule_id: data.rule_id,
+        wcag_criterion: data.wcag_criterion,
+        wcag_level: data.wcag_level,
+        severity: data.severity,
+        description: data.description,
+        instances_found: data.instances_found,
+        extrapolated_total: data.extrapolated_total,
+        remediation_guidance: data.remediation_guidance,
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to save violation: ${error.message}`);
+    }
+
+    return violation;
   }
 }
