@@ -1,10 +1,17 @@
 import * as fs from 'fs/promises';
 import * as yaml from 'yaml';
+import * as dotenv from 'dotenv';
 import { fetchSitemap } from '../sitemap/fetcher';
 import { parseSitemap } from '../sitemap/parser';
 import { PageTypeClassifier } from '../classifier/classifier';
 import { PageTypeAggregator } from '../classifier/aggregator';
+import { AdaptiveSampler } from '../sampling/sampler';
+import { AuditRunner } from '../services/audit-runner';
+import { AuditRepository } from '../database/repositories/audit-repository';
 import { autoClassify } from '../classification/heuristics';
+
+// Load environment variables
+dotenv.config();
 
 interface AuditOptions {
   url: string;
@@ -19,21 +26,46 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
   console.log(`   Config: ${options.config}`);
   console.log();
 
+  const startTime = Date.now();
+  let auditId: string | null = null;
+  let repository: AuditRepository | null = null;
+
   try {
     // Load config
     console.log('📋 Loading configuration...');
     const configFile = await fs.readFile(options.config, 'utf-8');
     const config = yaml.parse(configFile);
 
+    // Initialize database if not skipped
+    if (!options.skipDb) {
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+      if (supabaseUrl && supabaseKey) {
+        console.log('💾 Initializing database connection...');
+        repository = new AuditRepository(supabaseUrl, supabaseKey);
+
+        // Create audit record
+        const audit = await repository.createAudit({
+          status: 'running',
+          config_used: config,
+        });
+        auditId = audit.id;
+        console.log(`   Audit ID: ${auditId}`);
+      } else {
+        console.log('⚠️  Database credentials not found, running without database');
+      }
+    }
+
     // Fetch and parse sitemap
-    console.log('🗺️  Fetching sitemap...');
+    console.log('\n🗺️  Fetching sitemap...');
     const sitemapUrl = new URL('/sitemap.xml', options.url).toString();
     const sitemapXml = await fetchSitemap(sitemapUrl);
     const urls = await parseSitemap(sitemapXml);
     console.log(`   Found ${urls.length} URLs`);
 
     // Classify page types
-    console.log('🏷️  Classifying page types...');
+    console.log('\n🏷️  Classifying page types...');
     const classifier = new PageTypeClassifier(config.pageTypes);
     const aggregator = new PageTypeAggregator(classifier);
     const pageTypes = aggregator.aggregate(urls);
@@ -43,8 +75,51 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
       console.log(`   ${type.type}: ${type.totalCount} pages`);
     }
 
-    console.log('\n✅ Audit preparation complete!');
-    console.log('   (Full testing implementation coming in next tasks)');
+    // Initialize test runner
+    console.log('\n🧪 Initializing test engines...');
+    const runner = new AuditRunner();
+    await runner.init();
+
+    // Sample and test each page type
+    console.log('\n🔬 Testing pages with adaptive sampling...');
+    const sampler = new AdaptiveSampler({
+      initialSampleSize: 10,
+      maxSampleSize: 25,
+      consistencyThreshold: 0.9,
+    });
+
+    const allViolations: any[] = [];
+
+    for (const pageType of pageTypes) {
+      console.log(`\n   Testing ${pageType.type} (${pageType.totalCount} total pages)...`);
+
+      // Sample pages for this type
+      const sampleResult = await sampler.sample(pageType.urls, async (url: string) => {
+        try {
+          const merged = await runner.testUrlAndMerge(url);
+          return merged.violations.map((v) => v.id);
+        } catch (error) {
+          console.error(`     Error testing ${url}:`, error);
+          return [];
+        }
+      });
+
+      console.log(`     Tested ${sampleResult.samplesTaken} of ${pageType.totalCount} pages`);
+      console.log(`     Violations: ${sampleResult.violations.size} unique types`);
+
+      // Track violations for this page type
+      for (const violationId of sampleResult.violations) {
+        allViolations.push({
+          pageType: pageType.type,
+          violationId,
+          pagesAffected: sampleResult.samplesTaken,
+          totalPages: pageType.totalCount,
+        });
+      }
+    }
+
+    // Close test runner
+    await runner.close();
 
     // Auto-classify violations if using database
     // Note: This is a placeholder showing the integration point.
@@ -71,19 +146,47 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     //   console.log(`   Auto-classified ${classifiedCount} of ${allViolations.length} violations`);
     // }
 
-    // Save preliminary results
+    // Update audit status if using database
+    if (repository && auditId) {
+      const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
+      await repository.updateAuditStatus(auditId, 'completed', durationSeconds);
+      console.log(`\n✅ Audit saved to database (${durationSeconds}s)`);
+    }
+
+    // Save results
     const results = {
+      auditId,
       url: options.url,
       timestamp: new Date().toISOString(),
       totalUrls: urls.length,
-      pageTypes: pageTypes,
+      pageTypes: pageTypes.map((pt) => ({
+        type: pt.type,
+        totalCount: pt.totalCount,
+        pattern: pt.pattern,
+      })),
+      violations: allViolations,
+      durationSeconds: Math.floor((Date.now() - startTime) / 1000),
     };
 
     await fs.writeFile(options.output, JSON.stringify(results, null, 2));
     console.log(`\n💾 Results saved to ${options.output}`);
 
+    console.log('\n✅ Audit complete!');
+    console.log(`   Total violations found: ${allViolations.length}`);
+    console.log(`   Duration: ${results.durationSeconds}s`);
+
   } catch (error) {
-    console.error('❌ Audit failed:', error);
+    console.error('\n❌ Audit failed:', error);
+
+    // Mark audit as failed if using database
+    if (repository && auditId) {
+      try {
+        await repository.updateAuditStatus(auditId, 'failed');
+      } catch (dbError) {
+        console.error('Failed to update audit status:', dbError);
+      }
+    }
+
     process.exit(1);
   }
 }
