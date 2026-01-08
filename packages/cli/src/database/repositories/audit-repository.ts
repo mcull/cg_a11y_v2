@@ -80,4 +80,23 @@ export class AuditRepository {
 
     return audit;
   }
+
+  async createClassification(data: {
+    violation_id: string;
+    category: 'content' | 'structural';
+    auto_classified: boolean;
+    notes?: string;
+  }): Promise<void> {
+    const { error } = await this.client.from('classifications').insert({
+      violation_id: data.violation_id,
+      category: data.category,
+      auto_classified: data.auto_classified,
+      notes: data.notes || `Auto-classified as ${data.category}`,
+      classified_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      throw new Error(`Failed to create classification: ${error.message}`);
+    }
+  }
 }
