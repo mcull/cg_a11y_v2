@@ -4,6 +4,7 @@ import { fetchSitemap } from '../sitemap/fetcher';
 import { parseSitemap } from '../sitemap/parser';
 import { PageTypeClassifier } from '../classifier/classifier';
 import { PageTypeAggregator } from '../classifier/aggregator';
+import { autoClassify } from '../classification/heuristics';
 
 interface AuditOptions {
   url: string;
@@ -44,6 +45,31 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
 
     console.log('\n✅ Audit preparation complete!');
     console.log('   (Full testing implementation coming in next tasks)');
+
+    // Auto-classify violations if using database
+    // Note: This is a placeholder showing the integration point.
+    // Full implementation will be added when violation tracking is complete.
+    //
+    // Example usage when violations are available:
+    // if (repository && auditId) {
+    //   console.log('\n🏷️  Auto-classifying violations...');
+    //   let classifiedCount = 0;
+    //
+    //   for (const violation of allViolations) {
+    //     const classification = autoClassify(violation.violationId);
+    //
+    //     if (classification.category) {
+    //       await repository.createClassification({
+    //         violation_id: violation.id,
+    //         category: classification.category,
+    //         auto_classified: true,
+    //       });
+    //       classifiedCount++;
+    //     }
+    //   }
+    //
+    //   console.log(`   Auto-classified ${classifiedCount} of ${allViolations.length} violations`);
+    // }
 
     // Save preliminary results
     const results = {
