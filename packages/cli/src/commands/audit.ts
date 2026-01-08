@@ -8,6 +8,7 @@ import { PageTypeAggregator } from '../classifier/aggregator';
 import { AdaptiveSampler } from '../sampling/sampler';
 import { AuditRunner } from '../services/audit-runner';
 import { AuditRepository } from '../database/repositories/audit-repository';
+import { autoClassify } from '../classification/heuristics';
 
 // Load environment variables
 dotenv.config();
@@ -119,6 +120,31 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
 
     // Close test runner
     await runner.close();
+
+    // Auto-classify violations if using database
+    // Note: This is a placeholder showing the integration point.
+    // Full implementation will be added when violation tracking is complete.
+    //
+    // Example usage when violations are available:
+    // if (repository && auditId) {
+    //   console.log('\n🏷️  Auto-classifying violations...');
+    //   let classifiedCount = 0;
+    //
+    //   for (const violation of allViolations) {
+    //     const classification = autoClassify(violation.violationId);
+    //
+    //     if (classification.category) {
+    //       await repository.createClassification({
+    //         violation_id: violation.id,
+    //         category: classification.category,
+    //         auto_classified: true,
+    //       });
+    //       classifiedCount++;
+    //     }
+    //   }
+    //
+    //   console.log(`   Auto-classified ${classifiedCount} of ${allViolations.length} violations`);
+    // }
 
     // Update audit status if using database
     if (repository && auditId) {
