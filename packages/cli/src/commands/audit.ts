@@ -89,14 +89,19 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     });
 
     const allViolations: any[] = [];
+    const pageTypeViolations: Map<string, any[]> = new Map();
 
     for (const pageType of pageTypes) {
       console.log(`\n   Testing ${pageType.type} (${pageType.totalCount} total pages)...`);
+
+      const violationsForType: any[] = [];
 
       // Sample pages for this type
       const sampleResult = await sampler.sample(pageType.urls, async (url: string) => {
         try {
           const merged = await runner.testUrlAndMerge(url);
+          // Store full violation objects
+          violationsForType.push(...merged.violations);
           return merged.violations.map((v) => v.id);
         } catch (error) {
           console.error(`     Error testing ${url}:`, error);
@@ -107,7 +112,10 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
       console.log(`     Tested ${sampleResult.samplesTaken} of ${pageType.totalCount} pages`);
       console.log(`     Violations: ${sampleResult.violations.size} unique types`);
 
-      // Track violations for this page type
+      // Store violations keyed by page type
+      pageTypeViolations.set(pageType.type, violationsForType);
+
+      // Track violations for JSON output
       for (const violationId of sampleResult.violations) {
         allViolations.push({
           pageType: pageType.type,
@@ -121,36 +129,72 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     // Close test runner
     await runner.close();
 
-    // Auto-classify violations if using database
-    // Note: This is a placeholder showing the integration point.
-    // Full implementation will be added when violation tracking is complete.
-    //
-    // Example usage when violations are available:
-    // if (repository && auditId) {
-    //   console.log('\n🏷️  Auto-classifying violations...');
-    //   let classifiedCount = 0;
-    //
-    //   for (const violation of allViolations) {
-    //     const classification = autoClassify(violation.violationId);
-    //
-    //     if (classification.category) {
-    //       await repository.createClassification({
-    //         violation_id: violation.id,
-    //         category: classification.category,
-    //         auto_classified: true,
-    //       });
-    //       classifiedCount++;
-    //     }
-    //   }
-    //
-    //   console.log(`   Auto-classified ${classifiedCount} of ${allViolations.length} violations`);
-    // }
+    // Save page types and violations to database
+    if (repository && auditId) {
+      console.log('\n💾 Saving results to database...');
+
+      for (const pageType of pageTypes) {
+        // Save page type
+        const savedPageType = await repository.savePageType({
+          audit_id: auditId,
+          type_name: pageType.type,
+          url_pattern: pageType.pattern,
+          total_count_in_sitemap: pageType.totalCount,
+          pages_sampled: pageType.urls.length,
+        });
+
+        // Get violations for this page type
+        const violations = pageTypeViolations.get(pageType.type) || [];
+
+        // Group violations by ID to aggregate instances
+        const violationMap = new Map<string, any>();
+        for (const v of violations) {
+          if (!violationMap.has(v.id)) {
+            violationMap.set(v.id, {
+              ...v,
+              instances: 1,
+            });
+          } else {
+            const existing = violationMap.get(v.id)!;
+            existing.instances++;
+          }
+        }
+
+        // Save unique violations for this page type
+        for (const [violationId, violation] of violationMap) {
+          const savedViolation = await repository.saveViolation({
+            audit_id: auditId,
+            page_type_id: savedPageType.id,
+            rule_id: violation.id,
+            wcag_criterion: violation.wcagCriterion || 'Unknown',
+            wcag_level: (violation.wcagLevel as 'A' | 'AA' | 'AAA') || 'AA',
+            severity: (violation.impact as 'critical' | 'serious' | 'moderate' | 'minor') || 'serious',
+            description: violation.description || violation.help || 'No description available',
+            instances_found: violation.instances,
+            extrapolated_total: Math.round((violation.instances / pageType.urls.length) * pageType.totalCount),
+            remediation_guidance: violation.helpUrl || null,
+          });
+
+          // Auto-classify violation
+          const classification = autoClassify(violation.id);
+          if (classification.category) {
+            await repository.createClassification({
+              violation_id: savedViolation.id,
+              category: classification.category,
+              auto_classified: true,
+            });
+          }
+        }
+      }
+
+      console.log(`   Saved ${pageTypes.length} page types and their violations`);
+    }
 
     // Update audit status if using database
     if (repository && auditId) {
       const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
       await repository.updateAuditStatus(auditId, 'completed', durationSeconds);
-      console.log(`\n✅ Audit saved to database (${durationSeconds}s)`);
+      console.log(`\n✅ Audit completed and saved to database (${durationSeconds}s)`);
     }
 
     // Save results
