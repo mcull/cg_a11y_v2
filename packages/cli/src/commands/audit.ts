@@ -90,6 +90,7 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
 
     const allViolations: any[] = [];
     const pageTypeViolations: Map<string, any[]> = new Map();
+    const pageTypeSampleCounts: Map<string, number> = new Map();
 
     for (const pageType of pageTypes) {
       console.log(`\n   Testing ${pageType.type} (${pageType.totalCount} total pages)...`);
@@ -112,8 +113,9 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
       console.log(`     Tested ${sampleResult.samplesTaken} of ${pageType.totalCount} pages`);
       console.log(`     Violations: ${sampleResult.violations.size} unique types`);
 
-      // Store violations keyed by page type
+      // Store violations and sample count keyed by page type
       pageTypeViolations.set(pageType.type, violationsForType);
+      pageTypeSampleCounts.set(pageType.type, sampleResult.samplesTaken);
 
       // Track violations for JSON output
       for (const violationId of sampleResult.violations) {
@@ -140,7 +142,7 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
           type_name: pageType.type,
           url_pattern: pageType.pattern,
           total_count_in_sitemap: pageType.totalCount,
-          pages_sampled: pageType.urls.length,
+          pages_sampled: pageTypeSampleCounts.get(pageType.type) || 0,
         });
 
         // Get violations for this page type
