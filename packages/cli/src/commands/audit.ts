@@ -95,14 +95,16 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     for (const pageType of pageTypes) {
       console.log(`\n   Testing ${pageType.type} (${pageType.totalCount} total pages)...`);
 
-      const violationsForType: any[] = [];
+      const violationsForType: Array<{ violation: any; url: string }> = [];
 
       // Sample pages for this type
       const sampleResult = await sampler.sample(pageType.urls, async (url: string) => {
         try {
           const merged = await runner.testUrlAndMerge(url);
-          // Store full violation objects
-          violationsForType.push(...merged.violations);
+          // Store full violation objects WITH their source URL
+          for (const violation of merged.violations) {
+            violationsForType.push({ violation, url });
+          }
           return merged.violations.map((v) => v.id);
         } catch (error) {
           console.error(`     Error testing ${url}:`, error);
@@ -146,24 +148,24 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
         });
 
         // Get violations for this page type
-        const violations = pageTypeViolations.get(pageType.type) || [];
+        const violationsWithUrls = pageTypeViolations.get(pageType.type) || [];
 
-        // Group violations by ID to aggregate instances
-        const violationMap = new Map<string, any>();
-        for (const v of violations) {
-          if (!violationMap.has(v.id)) {
-            violationMap.set(v.id, {
-              ...v,
-              instances: 1,
+        // Group violations by ID and collect URLs for each
+        const violationMap = new Map<string, { violation: any; urls: string[] }>();
+        for (const { violation, url } of violationsWithUrls) {
+          if (!violationMap.has(violation.id)) {
+            violationMap.set(violation.id, {
+              violation,
+              urls: [url],
             });
           } else {
-            const existing = violationMap.get(v.id)!;
-            existing.instances++;
+            const existing = violationMap.get(violation.id)!;
+            existing.urls.push(url);
           }
         }
 
         // Save unique violations for this page type
-        for (const [violationId, violation] of violationMap) {
+        for (const [violationId, { violation, urls }] of violationMap) {
           const savedViolation = await repository.saveViolation({
             audit_id: auditId,
             page_type_id: savedPageType.id,
@@ -172,10 +174,20 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
             wcag_level: (violation.wcagLevel as 'A' | 'AA' | 'AAA') || 'AA',
             severity: (violation.impact as 'critical' | 'serious' | 'moderate' | 'minor') || 'serious',
             description: violation.description || violation.help || 'No description available',
-            instances_found: violation.instances,
-            extrapolated_total: Math.round((violation.instances / pageType.urls.length) * pageType.totalCount),
+            instances_found: urls.length,
+            extrapolated_total: Math.round((urls.length / pageTypeSampleCounts.get(pageType.type)!) * pageType.totalCount),
             remediation_guidance: violation.helpUrl || null,
           });
+
+          // Save violation example URLs
+          for (const url of urls) {
+            await repository.saveViolationExample({
+              violation_id: savedViolation.id,
+              url,
+              html_snippet: null, // Could be added later with more detailed violation data
+              css_selector: null, // Could be added later with more detailed violation data
+            });
+          }
 
           // Auto-classify violation
           const classification = autoClassify(violation.id);

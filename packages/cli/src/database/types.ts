@@ -33,3 +33,12 @@ export interface Violation {
   remediation_guidance: string | null;
   created_at: string;
 }
+
+export interface ViolationExample {
+  id: string;
+  violation_id: string;
+  url: string;
+  html_snippet: string | null;
+  css_selector: string | null;
+  created_at: string;
+}
