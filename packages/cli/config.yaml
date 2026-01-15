@@ -3,6 +3,10 @@ pageTypes:
   - pattern: "/artist/*"
     type: "Artist Page"
 
+  # Artwork detail pages - each artist has many artworks
+  - pattern: "/art/*"
+    type: "Artwork Page"
+
   # Exhibition/Show pages
   - pattern: "/show/*"
     type: "Exhibition Page"
