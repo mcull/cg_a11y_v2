@@ -4,6 +4,7 @@ describe('Page Type Classifier', () => {
   const patterns: PageTypePattern[] = [
     { pattern: '/artists/*', type: 'Artist Page' },
     { pattern: '/artworks/*', type: 'Artwork Page' },
+    { pattern: '/art/*', type: 'Artwork Page' },
     { pattern: '/blog/*', type: 'Blog Post' },
     { pattern: '/*', type: 'Other' },
   ];
@@ -37,5 +38,10 @@ describe('Page Type Classifier', () => {
   it('should handle trailing slashes', () => {
     const type = classifier.classify('https://example.com/artists/john-doe/');
     expect(type).toBe('Artist Page');
+  });
+
+  it('should classify Creative Growth artwork URLs correctly', () => {
+    const type = classifier.classify('https://creativegrowth.org/art/untitled-bt-1961-by-juan-aguilera');
+    expect(type).toBe('Artwork Page');
   });
 });
