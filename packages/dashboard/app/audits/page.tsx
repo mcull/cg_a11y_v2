@@ -64,7 +64,7 @@ export default async function AuditsPage({ searchParams }: AuditsPageProps) {
         <div className="flex-1">
           <div className="flex items-start gap-4">
             <div className="flex-1">
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                 These accessibility audits are powered by{' '}
                 <a
                   href="https://www.deque.com/axe/axe-core/"
@@ -74,8 +74,11 @@ export default async function AuditsPage({ searchParams }: AuditsPageProps) {
                 >
                   Deque's axe-core
                 </a>{' '}
-                testing engine. Axe-core's rules library is constantly updated and covers WCAG 2.0, 2.1, and 2.2 at levels A, AA, and AAA. The testing engine also adheres to rules outlined in global accessibility standards and regulations such as Section 508, EN 301 549, RGAA, and ADA, enabling you to ensure you're meeting all your compliance requirements.
+                testing engine:
               </p>
+              <blockquote className="border-l-3 border-muted-foreground/30 pl-4 text-sm text-muted-foreground leading-relaxed italic">
+                Axe-core's rules library is constantly updated and covers WCAG 2.0, 2.1, and 2.2 at levels A, AA, and AAA. The testing engine also adheres to rules outlined in global accessibility standards and regulations such as Section 508, EN 301 549, RGAA, and ADA, enabling you to ensure you're meeting all your compliance requirements.
+              </blockquote>
             </div>
             <a
               href="https://www.deque.com/axe/axe-core/"
