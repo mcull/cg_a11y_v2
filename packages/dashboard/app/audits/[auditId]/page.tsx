@@ -62,37 +62,41 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
     throw new Error(`Failed to fetch page types: ${pageTypesError.message}`);
   }
 
-  // Fetch classification breakdown
-  const { data: classificationData, error: classificationError } = await supabase
+  // Fetch violations for classification breakdown
+  const { data: violationsForBreakdown, error: violationsBreakdownError } = await supabase
     .from('violations')
-    .select(`
-      id,
-      extrapolated_total,
-      classifications (
-        category
-      )
-    `)
+    .select('id, extrapolated_total')
     .eq('audit_id', auditId);
 
-  if (classificationError) {
-    throw new Error(`Failed to fetch classifications: ${classificationError.message}`);
+  if (violationsBreakdownError) {
+    throw new Error(`Failed to fetch violations: ${violationsBreakdownError.message}`);
   }
+
+  // Fetch classifications separately
+  const violationIdsForBreakdown = violationsForBreakdown?.map((v) => v.id) || [];
+  const { data: classificationsForBreakdown } = await supabase
+    .from('classifications')
+    .select('violation_id, category')
+    .in('violation_id', violationIdsForBreakdown);
+
+  // Create a map of violation_id to category
+  const classificationMap = new Map(
+    classificationsForBreakdown?.map((c) => [c.violation_id, c.category]) || []
+  );
 
   // Calculate classification breakdown
   let contentViolations = 0;
   let structuralViolations = 0;
   let unclassifiedViolations = 0;
 
-  classificationData?.forEach((violation: any) => {
+  violationsForBreakdown?.forEach((violation) => {
     const total = violation.extrapolated_total || 0;
-    const classification = Array.isArray(violation.classifications) && violation.classifications[0];
+    const category = classificationMap.get(violation.id);
 
-    if (classification) {
-      if (classification.category === 'content') {
-        contentViolations += total;
-      } else if (classification.category === 'structural') {
-        structuralViolations += total;
-      }
+    if (category === 'content') {
+      contentViolations += total;
+    } else if (category === 'structural') {
+      structuralViolations += total;
     } else {
       unclassifiedViolations += total;
     }
