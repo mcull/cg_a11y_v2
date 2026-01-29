@@ -155,11 +155,29 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Content Issues</p>
-              <p className="text-2xl font-semibold text-blue-600">{contentViolations.toLocaleString()}</p>
+              {contentViolations > 0 ? (
+                <Link
+                  href={`/audits/${auditId}/violations/content`}
+                  className="text-2xl font-semibold text-blue-600 hover:underline"
+                >
+                  {contentViolations.toLocaleString()}
+                </Link>
+              ) : (
+                <p className="text-2xl font-semibold text-blue-600">{contentViolations.toLocaleString()}</p>
+              )}
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Structural Issues</p>
-              <p className="text-2xl font-semibold text-purple-600">{structuralViolations.toLocaleString()}</p>
+              {structuralViolations > 0 ? (
+                <Link
+                  href={`/audits/${auditId}/violations/structural`}
+                  className="text-2xl font-semibold text-purple-600 hover:underline"
+                >
+                  {structuralViolations.toLocaleString()}
+                </Link>
+              ) : (
+                <p className="text-2xl font-semibold text-purple-600">{structuralViolations.toLocaleString()}</p>
+              )}
             </div>
           </div>
           {unclassifiedViolations > 0 && (
