@@ -29,5 +29,6 @@ export async function classifyViolation(
   }
 
   // Revalidate the violations page to show updated classification
-  revalidatePath('/audits/[auditId]/page-types/[pageTypeId]', 'page');
+  // Use a broader path to ensure all related pages are refreshed
+  revalidatePath('/audits', 'layout');
 }

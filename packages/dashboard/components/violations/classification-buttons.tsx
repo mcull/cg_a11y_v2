@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { classifyViolation } from '@/lib/actions/classifications';
 
@@ -15,6 +16,7 @@ export function ClassificationButtons({
 }: ClassificationButtonsProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   async function handleClassify(category: 'content' | 'structural') {
     setLoading(true);
@@ -22,6 +24,7 @@ export function ClassificationButtons({
 
     try {
       await classifyViolation(violationId, category);
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to classify');
     } finally {
