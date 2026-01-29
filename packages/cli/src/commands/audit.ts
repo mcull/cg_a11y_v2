@@ -83,25 +83,28 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     // Sample and test each page type
     console.log('\n🔬 Testing pages with adaptive sampling...');
     const sampler = new AdaptiveSampler({
-      initialSampleSize: 10,
-      maxSampleSize: 25,
-      consistencyThreshold: 0.9,
+      initialSampleSize: 30,
+      maxSampleSize: 100,
+      consistencyThreshold: 0.95,
     });
 
     const allViolations: any[] = [];
     const pageTypeViolations: Map<string, any[]> = new Map();
+    const pageTypeSampleCounts: Map<string, number> = new Map();
 
     for (const pageType of pageTypes) {
       console.log(`\n   Testing ${pageType.type} (${pageType.totalCount} total pages)...`);
 
-      const violationsForType: any[] = [];
+      const violationsForType: Array<{ violation: any; url: string }> = [];
 
       // Sample pages for this type
       const sampleResult = await sampler.sample(pageType.urls, async (url: string) => {
         try {
           const merged = await runner.testUrlAndMerge(url);
-          // Store full violation objects
-          violationsForType.push(...merged.violations);
+          // Store full violation objects WITH their source URL
+          for (const violation of merged.violations) {
+            violationsForType.push({ violation, url });
+          }
           return merged.violations.map((v) => v.id);
         } catch (error) {
           console.error(`     Error testing ${url}:`, error);
@@ -112,8 +115,9 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
       console.log(`     Tested ${sampleResult.samplesTaken} of ${pageType.totalCount} pages`);
       console.log(`     Violations: ${sampleResult.violations.size} unique types`);
 
-      // Store violations keyed by page type
+      // Store violations and sample count keyed by page type
       pageTypeViolations.set(pageType.type, violationsForType);
+      pageTypeSampleCounts.set(pageType.type, sampleResult.samplesTaken);
 
       // Track violations for JSON output
       for (const violationId of sampleResult.violations) {
@@ -130,6 +134,7 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     await runner.close();
 
     // Save page types and violations to database
+    let totalViolationsCount = 0;
     if (repository && auditId) {
       console.log('\n💾 Saving results to database...');
 
@@ -140,28 +145,31 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
           type_name: pageType.type,
           url_pattern: pageType.pattern,
           total_count_in_sitemap: pageType.totalCount,
-          pages_sampled: pageType.urls.length,
+          pages_sampled: pageTypeSampleCounts.get(pageType.type) || 0,
         });
 
         // Get violations for this page type
-        const violations = pageTypeViolations.get(pageType.type) || [];
+        const violationsWithUrls = pageTypeViolations.get(pageType.type) || [];
 
-        // Group violations by ID to aggregate instances
-        const violationMap = new Map<string, any>();
-        for (const v of violations) {
-          if (!violationMap.has(v.id)) {
-            violationMap.set(v.id, {
-              ...v,
-              instances: 1,
+        // Group violations by ID and collect URLs for each
+        const violationMap = new Map<string, { violation: any; urls: string[] }>();
+        for (const { violation, url } of violationsWithUrls) {
+          if (!violationMap.has(violation.id)) {
+            violationMap.set(violation.id, {
+              violation,
+              urls: [url],
             });
           } else {
-            const existing = violationMap.get(v.id)!;
-            existing.instances++;
+            const existing = violationMap.get(violation.id)!;
+            existing.urls.push(url);
           }
         }
 
         // Save unique violations for this page type
-        for (const [violationId, violation] of violationMap) {
+        for (const [violationId, { violation, urls }] of violationMap) {
+          const extrapolatedTotal = Math.round((urls.length / pageTypeSampleCounts.get(pageType.type)!) * pageType.totalCount);
+          totalViolationsCount += extrapolatedTotal;
+
           const savedViolation = await repository.saveViolation({
             audit_id: auditId,
             page_type_id: savedPageType.id,
@@ -170,10 +178,20 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
             wcag_level: (violation.wcagLevel as 'A' | 'AA' | 'AAA') || 'AA',
             severity: (violation.impact as 'critical' | 'serious' | 'moderate' | 'minor') || 'serious',
             description: violation.description || violation.help || 'No description available',
-            instances_found: violation.instances,
-            extrapolated_total: Math.round((violation.instances / pageType.urls.length) * pageType.totalCount),
+            instances_found: urls.length,
+            extrapolated_total: extrapolatedTotal,
             remediation_guidance: violation.helpUrl || null,
           });
+
+          // Save violation example URLs
+          for (const url of urls) {
+            await repository.saveViolationExample({
+              violation_id: savedViolation.id,
+              url,
+              html_snippet: null, // Could be added later with more detailed violation data
+              css_selector: null, // Could be added later with more detailed violation data
+            });
+          }
 
           // Auto-classify violation
           const classification = autoClassify(violation.id);
@@ -193,8 +211,9 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     // Update audit status if using database
     if (repository && auditId) {
       const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
-      await repository.updateAuditStatus(auditId, 'completed', durationSeconds);
+      await repository.updateAuditStatus(auditId, 'completed', durationSeconds, totalViolationsCount);
       console.log(`\n✅ Audit completed and saved to database (${durationSeconds}s)`);
+      console.log(`   Total violations (extrapolated): ${totalViolationsCount.toLocaleString()}`);
     }
 
     // Save results

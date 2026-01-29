@@ -15,19 +15,24 @@ export class PageTypeClassifier {
   }
 
   classify(url: string): string {
+    const result = this.classifyWithPattern(url);
+    return result.type;
+  }
+
+  classifyWithPattern(url: string): { type: string; pattern: string } {
     try {
       const urlObj = new URL(url);
       const pathname = urlObj.pathname.replace(/\/$/, ''); // Remove trailing slash
 
       for (const { pattern, type } of this.patterns) {
         if (this.matchesPattern(pathname, pattern)) {
-          return type;
+          return { type, pattern };
         }
       }
 
-      return 'Unknown';
+      return { type: 'Unknown', pattern: '/*' };
     } catch (error) {
-      return 'Unknown';
+      return { type: 'Unknown', pattern: '/*' };
     }
   }
 

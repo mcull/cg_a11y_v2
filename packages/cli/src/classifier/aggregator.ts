@@ -13,11 +13,11 @@ export class PageTypeAggregator {
     const typeMap = new Map<string, { pattern: string; urls: string[] }>();
 
     for (const url of urls) {
-      const type = this.classifier.classify(url.loc);
+      const { type, pattern } = this.classifier.classifyWithPattern(url.loc);
 
       if (!typeMap.has(type)) {
         typeMap.set(type, {
-          pattern: this.getPatternForType(type),
+          pattern,
           urls: [],
         });
       }
@@ -38,11 +38,5 @@ export class PageTypeAggregator {
 
     // Sort by count descending
     return results.sort((a, b) => b.totalCount - a.totalCount);
-  }
-
-  private getPatternForType(type: string): string {
-    // This is a simplified version - in real implementation,
-    // we'd store the matched pattern in the classifier
-    return `/*`; // Placeholder
   }
 }

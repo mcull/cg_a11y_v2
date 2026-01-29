@@ -41,7 +41,7 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
     notFound();
   }
 
-  // Fetch page types with violation counts
+  // Fetch page types with violation data
   const { data: pageTypes, error: pageTypesError } = await supabase
     .from('page_types')
     .select(`
@@ -50,13 +50,33 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
       url_pattern,
       total_count_in_sitemap,
       pages_sampled,
-      violations (count)
+      violations (
+        instances_found,
+        extrapolated_total
+      )
     `)
     .eq('audit_id', auditId);
 
   if (pageTypesError) {
     throw new Error(`Failed to fetch page types: ${pageTypesError.message}`);
   }
+
+  // Calculate violation totals for each page type
+  const pageTypesWithCounts = pageTypes?.map((pageType) => {
+    const violations = Array.isArray(pageType.violations) ? pageType.violations : [];
+    const totalInstances = violations.reduce((sum, v: any) => sum + (v.instances_found || 0), 0);
+    const totalExtrapolated = violations.reduce((sum, v: any) => sum + (v.extrapolated_total || 0), 0);
+
+    return {
+      ...pageType,
+      violationCount: violations.length,
+      totalInstances,
+      totalExtrapolated,
+    };
+  }) || [];
+
+  // Calculate total violations across all page types
+  const totalViolationsFound = pageTypesWithCounts.reduce((sum, pt) => sum + pt.totalExtrapolated, 0);
 
   return (
     <div className="container mx-auto py-8">
@@ -89,8 +109,8 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
               <p className="text-2xl font-semibold">{audit.duration_seconds || 0}s</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Total Violations</p>
-              <p className="text-2xl font-semibold">{audit.total_violations || 0}</p>
+              <p className="text-sm text-muted-foreground">Total Violations (Extrapolated)</p>
+              <p className="text-2xl font-semibold">{totalViolationsFound.toLocaleString()}</p>
             </div>
           </div>
         </CardContent>
@@ -103,7 +123,7 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
           <CardDescription>Click a page type to view violations</CardDescription>
         </CardHeader>
         <CardContent>
-          {pageTypes && pageTypes.length > 0 ? (
+          {pageTypesWithCounts && pageTypesWithCounts.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -115,7 +135,7 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pageTypes.map((pageType) => (
+                {pageTypesWithCounts.map((pageType) => (
                   <TableRow key={pageType.id}>
                     <TableCell>
                       <Link
@@ -129,11 +149,14 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
                       {pageType.url_pattern}
                     </TableCell>
                     <TableCell>{pageType.pages_sampled}</TableCell>
-                    <TableCell>{pageType.total_count_in_sitemap}</TableCell>
+                    <TableCell>{pageType.total_count_in_sitemap.toLocaleString()}</TableCell>
                     <TableCell>
-                      {Array.isArray(pageType.violations)
-                        ? pageType.violations.length
-                        : (pageType.violations as any)?.count || 0}
+                      <div className="text-sm">
+                        <div className="font-semibold">{pageType.totalExtrapolated.toLocaleString()}</div>
+                        <div className="text-muted-foreground text-xs">
+                          {pageType.violationCount} unique types
+                        </div>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

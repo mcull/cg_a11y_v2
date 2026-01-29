@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Audit, PageType, Violation } from '../types';
+import { Audit, PageType, Violation, ViolationExample } from '../types';
 
 export class AuditRepository {
   private client: SupabaseClient;
@@ -29,11 +29,15 @@ export class AuditRepository {
   async updateAuditStatus(
     auditId: string,
     status: 'running' | 'completed' | 'failed',
-    durationSeconds?: number
+    durationSeconds?: number,
+    totalViolations?: number
   ): Promise<Audit> {
     const updates: any = { status };
     if (durationSeconds !== undefined) {
       updates.duration_seconds = durationSeconds;
+    }
+    if (totalViolations !== undefined) {
+      updates.total_violations = totalViolations;
     }
 
     const { data: audit, error } = await this.client
@@ -143,5 +147,24 @@ export class AuditRepository {
     if (error) {
       throw new Error(`Failed to create classification: ${error.message}`);
     }
+  }
+
+  async saveViolationExample(data: Omit<ViolationExample, 'id' | 'created_at'>): Promise<ViolationExample> {
+    const { data: example, error } = await this.client
+      .from('violation_examples')
+      .insert([{
+        violation_id: data.violation_id,
+        url: data.url,
+        html_snippet: data.html_snippet,
+        css_selector: data.css_selector,
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to save violation example: ${error.message}`);
+    }
+
+    return example;
   }
 }

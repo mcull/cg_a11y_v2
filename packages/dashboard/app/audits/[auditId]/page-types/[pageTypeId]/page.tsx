@@ -140,10 +140,15 @@ export default async function ViolationsPage({ params }: ViolationsPageProps) {
                           </CardDescription>
                         </div>
                         <div className="text-right">
-                          <p className="text-2xl font-semibold">
-                            {violation.instances_found}
-                          </p>
-                          <p className="text-sm text-muted-foreground">instances</p>
+                          <Link
+                            href={`/audits/${auditId}/violations/${violation.id}/examples`}
+                            className="block hover:bg-accent rounded-lg p-2 transition-colors"
+                          >
+                            <p className="text-2xl font-semibold text-primary hover:underline">
+                              {violation.instances_found}
+                            </p>
+                            <p className="text-sm text-muted-foreground">instances →</p>
+                          </Link>
                         </div>
                       </div>
                     </CardHeader>
