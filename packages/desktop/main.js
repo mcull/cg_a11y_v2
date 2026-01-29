@@ -1,9 +1,6 @@
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const Store = require('electron-store');
-const { spawn } = require('child_process');
-
-// Don't import CLI directly - we'll run it as a subprocess
 
 // Initialize electron-store for settings
 const store = new Store();
@@ -102,59 +99,32 @@ ipcMain.handle('run-audit', async (event, url) => {
 
     sendProgress('Starting audit...');
 
-    // Find the CLI executable path based on whether we're in dev or production
+    // Find the CLI path based on whether we're in dev or production
     const isDev = !app.isPackaged;
-    const cliPath = isDev
-      ? path.join(__dirname, '../cli/dist/cli.js')
-      : path.join(process.resourcesPath, 'cli', 'dist', 'cli.js');
+    const cliCommandPath = isDev
+      ? path.join(__dirname, '../cli/dist/commands/audit.js')
+      : path.join(process.resourcesPath, 'cli', 'dist', 'commands', 'audit.js');
 
     const configPath = isDev
       ? path.join(__dirname, '../cli/config.yaml')
       : path.join(process.resourcesPath, 'cli', 'config.yaml');
 
-    // Run the audit as a subprocess using Electron's bundled Node
-    await new Promise((resolve, reject) => {
-      const auditProcess = spawn(process.execPath, [cliPath, 'audit', url, '--config', configPath, '--skip-db=false'], {
-        env: {
-          ...process.env,
-          SUPABASE_URL: settings.supabaseUrl,
-          SUPABASE_ANON_KEY: settings.supabaseKey,
-        },
-      });
+    // Import and run the audit command directly
+    const { auditCommand } = require(cliCommandPath);
 
-      let output = '';
-      let errorOutput = '';
-
-      auditProcess.stdout.on('data', (data) => {
-        const message = data.toString();
-        output += message;
-        sendProgress(message.trim());
-      });
-
-      auditProcess.stderr.on('data', (data) => {
-        const message = data.toString();
-        errorOutput += message;
-        console.error('Audit stderr:', message);
-      });
-
-      auditProcess.on('close', (code) => {
-        if (code === 0) {
-          sendProgress('Audit completed successfully!');
-          resolve();
-        } else {
-          reject(new Error(errorOutput || `Audit failed with code ${code}`));
-        }
-      });
-
-      auditProcess.on('error', (err) => {
-        reject(err);
-      });
+    await auditCommand({
+      url: url,
+      config: configPath,
+      output: path.join(app.getPath('temp'), 'audit-results.json'),
+      skipDb: false,
+      onProgress: (message) => {
+        sendProgress(message);
+      }
     });
 
     return {
       success: true,
-      message: 'Audit completed successfully!',
-      outputPath
+      message: 'Audit completed successfully!'
     };
   } catch (error) {
     console.error('Audit failed:', error);
