@@ -43,10 +43,23 @@
       "preload.js",
       "renderer/**/*",
       "assets/**/*",
-      "dmiller.jpg",
-      "../cli/dist/**/*",
-      "../cli/node_modules/**/*",
-      "../cli/config.yaml"
+      "dmiller.jpg"
+    ],
+    "extraResources": [
+      {
+        "from": "../cli/dist",
+        "to": "cli/dist",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "../cli/node_modules",
+        "to": "cli/node_modules",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "../cli/config.yaml",
+        "to": "cli/config.yaml"
+      }
     ],
     "directories": {
       "buildResources": "assets"
