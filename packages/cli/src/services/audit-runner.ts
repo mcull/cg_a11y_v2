@@ -30,9 +30,9 @@ export class AuditRunner {
     await Promise.all([this.axeTester.close(), this.pa11yTester.close()]);
   }
 
-  async testUrl(url: string): Promise<DualTestResult> {
+  async testUrl(url: string, onScreenshot?: (screenshot: string) => void): Promise<DualTestResult> {
     const [axeResults, pa11yResults] = await Promise.all([
-      this.axeTester.testUrl(url),
+      this.axeTester.testUrl(url, onScreenshot),
       this.pa11yTester.testUrl(url),
     ]);
 
@@ -54,8 +54,8 @@ export class AuditRunner {
     };
   }
 
-  async testUrlAndMerge(url: string): Promise<MergedTestResult> {
-    const { axe, pa11y } = await this.testUrl(url);
+  async testUrlAndMerge(url: string, onScreenshot?: (screenshot: string) => void): Promise<MergedTestResult> {
+    const { axe, pa11y } = await this.testUrl(url, onScreenshot);
 
     // Merge violations from both engines, removing duplicates
     const mergedViolations = this.mergeViolations(axe.violations, pa11y.violations);

@@ -23,9 +23,10 @@ function createWindow() {
 
   mainWindow.loadFile('renderer/index.html');
 
-  // Open DevTools for debugging
-  // TODO: Remove this in final production build
-  mainWindow.webContents.openDevTools();
+  // Open DevTools in development only
+  if (!app.isPackaged) {
+    mainWindow.webContents.openDevTools();
+  }
 }
 
 app.whenReady().then(() => {

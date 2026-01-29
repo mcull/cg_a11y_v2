@@ -109,7 +109,12 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
       // Sample pages for this type
       const sampleResult = await sampler.sample(pageType.urls, async (url: string) => {
         try {
-          const merged = await runner.testUrlAndMerge(url);
+          const merged = await runner.testUrlAndMerge(url, (screenshot) => {
+            // Send screenshot through progress callback
+            if (options.onProgress) {
+              options.onProgress(`SCREENSHOT:${screenshot}`);
+            }
+          });
           // Store full violation objects WITH their source URL
           for (const violation of merged.violations) {
             violationsForType.push({ violation, url });

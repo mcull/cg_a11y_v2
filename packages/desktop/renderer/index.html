@@ -47,10 +47,17 @@
 
       <!-- Progress Section -->
       <div id="progress-section" style="display: none;">
-        <div class="progress-bar">
-          <div id="progress-fill" class="progress-fill"></div>
+        <div class="progress-container">
+          <div class="progress-info">
+            <div class="progress-bar">
+              <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <p id="progress-message" class="progress-message">Initializing...</p>
+          </div>
+          <div id="screenshot-preview" class="screenshot-preview" style="display: none;">
+            <img id="screenshot-img" src="" alt="Current page">
+          </div>
         </div>
-        <p id="progress-message" class="progress-message">Initializing...</p>
       </div>
 
       <!-- Status Message -->

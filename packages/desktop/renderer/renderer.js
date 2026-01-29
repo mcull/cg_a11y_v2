@@ -207,6 +207,17 @@ function showConnectionStatus(message, type) {
 }
 
 function showProgress(message) {
+  // Handle screenshot messages
+  if (message.startsWith('SCREENSHOT:')) {
+    const imageData = message.replace('SCREENSHOT:', '');
+    const screenshotPreview = document.getElementById('screenshot-preview');
+    const screenshotImg = document.getElementById('screenshot-img');
+
+    screenshotImg.src = imageData;
+    screenshotPreview.style.display = 'block';
+    return;
+  }
+
   progressMessage.textContent = message;
 
   // Animate progress bar based on message content

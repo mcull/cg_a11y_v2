@@ -256,3 +256,30 @@ footer {
 .hidden {
   display: none !important;
 }
+
+/* Screenshot preview */
+.progress-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.progress-info {
+  flex: 1;
+}
+
+.screenshot-preview {
+  width: 200px;
+  height: 150px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.screenshot-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

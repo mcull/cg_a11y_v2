@@ -26,7 +26,7 @@ export class AxeTester {
     }
   }
 
-  async testUrl(url: string): Promise<TestResult> {
+  async testUrl(url: string, onScreenshot?: (screenshot: string) => void): Promise<TestResult> {
     if (!this.browser) {
       throw new Error('Browser not initialized. Call init() first.');
     }
@@ -35,6 +35,22 @@ export class AxeTester {
 
     try {
       await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+
+      // Capture screenshot if callback provided
+      if (onScreenshot) {
+        try {
+          const screenshot = await page.screenshot({
+            encoding: 'base64',
+            type: 'jpeg',
+            quality: 50,
+            fullPage: false
+          });
+          onScreenshot(`data:image/jpeg;base64,${screenshot}`);
+        } catch (err) {
+          // Ignore screenshot errors, continue with audit
+        }
+      }
+
       return await this.runAxe(page, url);
     } finally {
       await page.close();
