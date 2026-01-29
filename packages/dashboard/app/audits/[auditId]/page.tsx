@@ -30,11 +30,12 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
   const { auditId } = await params;
   const supabase = getSupabaseClient();
 
-  // Fetch audit details
+  // Fetch audit details (only if active)
   const { data: audit, error: auditError } = await supabase
     .from('audits')
     .select('*')
     .eq('id', auditId)
+    .eq('active', true)
     .single();
 
   if (auditError || !audit) {

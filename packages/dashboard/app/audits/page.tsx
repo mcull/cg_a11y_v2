@@ -28,10 +28,11 @@ export default async function AuditsPage({ searchParams }: AuditsPageProps) {
   const { status, sort } = await searchParams;
   const supabase = getSupabaseClient();
 
-  // Build query with filters
+  // Build query with filters (only show active audits)
   let query = supabase
     .from('audits')
     .select('id, timestamp, status, duration_seconds, total_violations')
+    .eq('active', true)
     .order('timestamp', { ascending: sort === 'oldest' });
 
   if (status && status !== 'all') {

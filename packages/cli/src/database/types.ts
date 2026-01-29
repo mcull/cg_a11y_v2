@@ -5,6 +5,7 @@ export interface Audit {
   config_used: any;
   total_violations: number;
   duration_seconds: number | null;
+  active: boolean;
   created_at: string;
   updated_at: string;
 }

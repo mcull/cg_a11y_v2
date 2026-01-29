@@ -9,10 +9,10 @@ export async function DELETE(
     const { auditId } = await params;
     const supabase = getSupabaseClient();
 
-    // Delete the audit (cascade will handle related records)
+    // Soft delete the audit by setting active to false
     const { error } = await supabase
       .from('audits')
-      .delete()
+      .update({ active: false })
       .eq('id', auditId);
 
     if (error) {
