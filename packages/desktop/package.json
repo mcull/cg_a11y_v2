@@ -1,0 +1,55 @@
+{
+  "name": "@cg-a11y/desktop",
+  "version": "1.0.0",
+  "description": "Creative Growth Accessibility Auditor - Desktop App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "dev": "electron ."
+  },
+  "keywords": [
+    "accessibility",
+    "audit",
+    "wcag",
+    "electron"
+  ],
+  "author": "Marc Cull",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mcull/cg_a11y_v2.git"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "electron-store": "^8.1.0"
+  },
+  "devDependencies": {
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "org.creativegrowth.auditor",
+    "productName": "Creative Growth Auditor",
+    "publish": null,
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": ["dmg"],
+      "icon": "assets/cgally1.png"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "assets/**/*",
+      "dmiller.jpg",
+      "../cli/dist/**/*",
+      "../cli/node_modules/**/*",
+      "../cli/config.yaml"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
+  }
+}
