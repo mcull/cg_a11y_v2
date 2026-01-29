@@ -112,9 +112,9 @@ ipcMain.handle('run-audit', async (event, url) => {
       ? path.join(__dirname, '../cli/config.yaml')
       : path.join(process.resourcesPath, 'cli', 'config.yaml');
 
-    // Run the audit as a subprocess
+    // Run the audit as a subprocess using Electron's bundled Node
     await new Promise((resolve, reject) => {
-      const auditProcess = spawn('node', [cliPath, 'audit', url, '--config', configPath, '--skip-db=false'], {
+      const auditProcess = spawn(process.execPath, [cliPath, 'audit', url, '--config', configPath, '--skip-db=false'], {
         env: {
           ...process.env,
           SUPABASE_URL: settings.supabaseUrl,
