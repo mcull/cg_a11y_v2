@@ -6,10 +6,17 @@ export class AxeTester {
   private browser: Browser | null = null;
 
   async init(): Promise<void> {
-    this.browser = await puppeteer.launch({
+    const launchOptions: any = {
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
+    };
+
+    // Use custom Chrome path if provided
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    }
+
+    this.browser = await puppeteer.launch(launchOptions);
   }
 
   async close(): Promise<void> {

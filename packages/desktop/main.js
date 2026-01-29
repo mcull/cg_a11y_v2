@@ -86,6 +86,11 @@ ipcMain.handle('run-audit', async (event, url) => {
     process.env.SUPABASE_URL = settings.supabaseUrl;
     process.env.SUPABASE_ANON_KEY = settings.supabaseKey;
 
+    // Set Puppeteer to use system Chrome on macOS (in packaged app)
+    if (process.platform === 'darwin' && app.isPackaged) {
+      process.env.PUPPETEER_EXECUTABLE_PATH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+    }
+
     // Send progress updates (with safety check)
     const sendProgress = (message) => {
       try {
