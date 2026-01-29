@@ -3,6 +3,8 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { AuditFilters } from '@/components/audits/audit-filters';
 import { StatusBadge } from '@/components/audits/status-badge';
 import { LocalTimestamp } from '@/components/ui/local-timestamp';
+import { DeleteAuditButton } from '@/components/audits/delete-audit-button';
+import { MarkFailedButton } from '@/components/audits/mark-failed-button';
 
 export const dynamic = 'force-dynamic';
 import {
@@ -62,6 +64,7 @@ export default async function AuditsPage({ searchParams }: AuditsPageProps) {
                   <TableHead>Status</TableHead>
                   <TableHead>Duration</TableHead>
                   <TableHead>Total Violations</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -76,10 +79,18 @@ export default async function AuditsPage({ searchParams }: AuditsPageProps) {
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <StatusBadge status={audit.status} />
+                      <StatusBadge status={audit.status} timestamp={audit.timestamp} />
                     </TableCell>
                     <TableCell>{audit.duration_seconds || 0}s</TableCell>
                     <TableCell>{audit.total_violations || 0}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        {audit.status === 'running' && (
+                          <MarkFailedButton auditId={audit.id} />
+                        )}
+                        <DeleteAuditButton auditId={audit.id} />
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
