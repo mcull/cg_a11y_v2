@@ -18,12 +18,21 @@ interface AuditOptions {
   config: string;
   output: string;
   skipDb?: boolean;
+  onProgress?: (message: string) => void;
 }
 
 export async function auditCommand(options: AuditOptions): Promise<void> {
-  console.log('🚀 Starting accessibility audit...');
-  console.log(`   URL: ${options.url}`);
-  console.log(`   Config: ${options.config}`);
+  // Helper to log and send progress
+  const logProgress = (message: string) => {
+    console.log(message);
+    if (options.onProgress) {
+      options.onProgress(message);
+    }
+  };
+
+  logProgress('🚀 Starting accessibility audit...');
+  logProgress(`   URL: ${options.url}`);
+  logProgress(`   Config: ${options.config}`);
   console.log();
 
   const startTime = Date.now();
@@ -32,7 +41,7 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
 
   try {
     // Load config
-    console.log('📋 Loading configuration...');
+    logProgress('📋 Loading configuration...');
     const configFile = await fs.readFile(options.config, 'utf-8');
     const config = yaml.parse(configFile);
 
@@ -42,7 +51,7 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
       const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
       if (supabaseUrl && supabaseKey) {
-        console.log('💾 Initializing database connection...');
+        logProgress('💾 Initializing database connection...');
         repository = new AuditRepository(supabaseUrl, supabaseKey);
 
         // Create audit record
@@ -51,37 +60,37 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
           config_used: config,
         });
         auditId = audit.id;
-        console.log(`   Audit ID: ${auditId}`);
+        logProgress(`   Audit ID: ${auditId}`);
       } else {
-        console.log('⚠️  Database credentials not found, running without database');
+        logProgress('⚠️  Database credentials not found, running without database');
       }
     }
 
     // Fetch and parse sitemap
-    console.log('\n🗺️  Fetching sitemap...');
+    logProgress('🗺️  Fetching sitemap...');
     const sitemapUrl = new URL('/sitemap.xml', options.url).toString();
     const sitemapXml = await fetchSitemap(sitemapUrl);
     const urls = await parseSitemap(sitemapXml);
-    console.log(`   Found ${urls.length} URLs`);
+    logProgress(`   Found ${urls.length} URLs`);
 
     // Classify page types
-    console.log('\n🏷️  Classifying page types...');
+    logProgress('🏷️  Classifying page types...');
     const classifier = new PageTypeClassifier(config.pageTypes);
     const aggregator = new PageTypeAggregator(classifier);
     const pageTypes = aggregator.aggregate(urls);
 
-    console.log('\n📊 Page Types:');
+    logProgress('📊 Page Types:');
     for (const type of pageTypes) {
-      console.log(`   ${type.type}: ${type.totalCount} pages`);
+      logProgress(`   ${type.type}: ${type.totalCount} pages`);
     }
 
     // Initialize test runner
-    console.log('\n🧪 Initializing test engines...');
+    logProgress('🧪 Initializing test engines...');
     const runner = new AuditRunner();
     await runner.init();
 
     // Sample and test each page type
-    console.log('\n🔬 Testing pages with adaptive sampling...');
+    logProgress('🔬 Testing pages with adaptive sampling...');
     const sampler = new AdaptiveSampler({
       initialSampleSize: 30,
       maxSampleSize: 100,
@@ -93,7 +102,7 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     const pageTypeSampleCounts: Map<string, number> = new Map();
 
     for (const pageType of pageTypes) {
-      console.log(`\n   Testing ${pageType.type} (${pageType.totalCount} total pages)...`);
+      logProgress(`Testing ${pageType.type} (${pageType.totalCount} total pages)...`);
 
       const violationsForType: Array<{ violation: any; url: string }> = [];
 
@@ -112,8 +121,8 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
         }
       });
 
-      console.log(`     Tested ${sampleResult.samplesTaken} of ${pageType.totalCount} pages`);
-      console.log(`     Violations: ${sampleResult.violations.size} unique types`);
+      logProgress(`  Tested ${sampleResult.samplesTaken} of ${pageType.totalCount} pages`);
+      logProgress(`  Violations: ${sampleResult.violations.size} unique types`);
 
       // Store violations and sample count keyed by page type
       pageTypeViolations.set(pageType.type, violationsForType);
@@ -136,7 +145,7 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     // Save page types and violations to database
     let totalViolationsCount = 0;
     if (repository && auditId) {
-      console.log('\n💾 Saving results to database...');
+      logProgress('💾 Saving results to database...');
 
       for (const pageType of pageTypes) {
         // Save page type
@@ -205,15 +214,15 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
         }
       }
 
-      console.log(`   Saved ${pageTypes.length} page types and their violations`);
+      logProgress(`   Saved ${pageTypes.length} page types and their violations`);
     }
 
     // Update audit status if using database
     if (repository && auditId) {
       const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
       await repository.updateAuditStatus(auditId, 'completed', durationSeconds, totalViolationsCount);
-      console.log(`\n✅ Audit completed and saved to database (${durationSeconds}s)`);
-      console.log(`   Total violations (extrapolated): ${totalViolationsCount.toLocaleString()}`);
+      logProgress(`✅ Audit completed and saved to database (${durationSeconds}s)`);
+      logProgress(`   Total violations (extrapolated): ${totalViolationsCount.toLocaleString()}`);
     }
 
     // Save results
@@ -232,11 +241,11 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     };
 
     await fs.writeFile(options.output, JSON.stringify(results, null, 2));
-    console.log(`\n💾 Results saved to ${options.output}`);
+    logProgress(`💾 Results saved to ${options.output}`);
 
-    console.log('\n✅ Audit complete!');
-    console.log(`   Total violations found: ${allViolations.length}`);
-    console.log(`   Duration: ${results.durationSeconds}s`);
+    logProgress('✅ Audit complete!');
+    logProgress(`   Total violations found: ${allViolations.length}`);
+    logProgress(`   Duration: ${results.durationSeconds}s`);
 
   } catch (error) {
     console.error('\n❌ Audit failed:', error);
@@ -250,6 +259,11 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
       }
     }
 
-    process.exit(1);
+    // Only exit if running as CLI, not if imported as module (e.g., by Electron app)
+    if (require.main === module) {
+      process.exit(1);
+    } else {
+      throw error;  // Let caller handle the error
+    }
   }
 }

@@ -1,0 +1,465 @@
+{
+  "auditId": "11ee1a34-3304-4070-b732-d94f2fad3c18",
+  "url": "https://creativegrowth.org",
+  "timestamp": "2026-01-29T18:49:12.773Z",
+  "totalUrls": 3261,
+  "pageTypes": [
+    {
+      "type": "Artwork Page",
+      "totalCount": 2757,
+      "pattern": "/art/*"
+    },
+    {
+      "type": "Artist Page",
+      "totalCount": 200,
+      "pattern": "/artist/*"
+    },
+    {
+      "type": "Blog Post",
+      "totalCount": 157,
+      "pattern": "/post/*"
+    },
+    {
+      "type": "Exhibition Page",
+      "totalCount": 124,
+      "pattern": "/show/*"
+    },
+    {
+      "type": "Static Page",
+      "totalCount": 10,
+      "pattern": "/about"
+    },
+    {
+      "type": "Other",
+      "totalCount": 7,
+      "pattern": "/*"
+    },
+    {
+      "type": "Product Page",
+      "totalCount": 5,
+      "pattern": "/products*"
+    },
+    {
+      "type": "Unknown",
+      "totalCount": 1,
+      "pattern": "/*"
+    }
+  ],
+  "violations": [
+    {
+      "pageType": "Artwork Page",
+      "violationId": "document-title",
+      "pagesAffected": 30,
+      "totalPages": 2757
+    },
+    {
+      "pageType": "Artwork Page",
+      "violationId": "html-has-lang",
+      "pagesAffected": 30,
+      "totalPages": 2757
+    },
+    {
+      "pageType": "Artwork Page",
+      "violationId": "landmark-one-main",
+      "pagesAffected": 30,
+      "totalPages": 2757
+    },
+    {
+      "pageType": "Artwork Page",
+      "violationId": "page-has-heading-one",
+      "pagesAffected": 30,
+      "totalPages": 2757
+    },
+    {
+      "pageType": "Artwork Page",
+      "violationId": "WCAG2AA.Principle3.Guideline3_2.3_2_2.H32.2",
+      "pagesAffected": 30,
+      "totalPages": 2757
+    },
+    {
+      "pageType": "Artwork Page",
+      "violationId": "WCAG2AA.Principle4.Guideline4_1.4_1_2.H91.Textarea.Name",
+      "pagesAffected": 30,
+      "totalPages": 2757
+    },
+    {
+      "pageType": "Artwork Page",
+      "violationId": "WCAG2AA.Principle1.Guideline1_3.1_3_1.F68",
+      "pagesAffected": 30,
+      "totalPages": 2757
+    },
+    {
+      "pageType": "Artwork Page",
+      "violationId": "WCAG2AA.Principle2.Guideline2_4.2_4_1.H64.1",
+      "pagesAffected": 30,
+      "totalPages": 2757
+    },
+    {
+      "pageType": "Artist Page",
+      "violationId": "document-title",
+      "pagesAffected": 30,
+      "totalPages": 200
+    },
+    {
+      "pageType": "Artist Page",
+      "violationId": "html-has-lang",
+      "pagesAffected": 30,
+      "totalPages": 200
+    },
+    {
+      "pageType": "Artist Page",
+      "violationId": "landmark-one-main",
+      "pagesAffected": 30,
+      "totalPages": 200
+    },
+    {
+      "pageType": "Artist Page",
+      "violationId": "page-has-heading-one",
+      "pagesAffected": 30,
+      "totalPages": 200
+    },
+    {
+      "pageType": "Artist Page",
+      "violationId": "WCAG2AA.Principle3.Guideline3_2.3_2_2.H32.2",
+      "pagesAffected": 30,
+      "totalPages": 200
+    },
+    {
+      "pageType": "Artist Page",
+      "violationId": "WCAG2AA.Principle1.Guideline1_4.1_4_3.G145.Fail",
+      "pagesAffected": 30,
+      "totalPages": 200
+    },
+    {
+      "pageType": "Artist Page",
+      "violationId": "WCAG2AA.Principle4.Guideline4_1.4_1_2.H91.A.NoContent",
+      "pagesAffected": 30,
+      "totalPages": 200
+    },
+    {
+      "pageType": "Artist Page",
+      "violationId": "WCAG2AA.Principle2.Guideline2_4.2_4_1.H64.1",
+      "pagesAffected": 30,
+      "totalPages": 200
+    },
+    {
+      "pageType": "Blog Post",
+      "violationId": "document-title",
+      "pagesAffected": 30,
+      "totalPages": 157
+    },
+    {
+      "pageType": "Blog Post",
+      "violationId": "html-has-lang",
+      "pagesAffected": 30,
+      "totalPages": 157
+    },
+    {
+      "pageType": "Blog Post",
+      "violationId": "landmark-one-main",
+      "pagesAffected": 30,
+      "totalPages": 157
+    },
+    {
+      "pageType": "Blog Post",
+      "violationId": "page-has-heading-one",
+      "pagesAffected": 30,
+      "totalPages": 157
+    },
+    {
+      "pageType": "Blog Post",
+      "violationId": "WCAG2AA.Principle3.Guideline3_2.3_2_2.H32.2",
+      "pagesAffected": 30,
+      "totalPages": 157
+    },
+    {
+      "pageType": "Blog Post",
+      "violationId": "WCAG2AA.Principle2.Guideline2_4.2_4_1.H64.1",
+      "pagesAffected": 30,
+      "totalPages": 157
+    },
+    {
+      "pageType": "Blog Post",
+      "violationId": "WCAG2AA.Principle4.Guideline4_1.4_1_2.H91.Textarea.Name",
+      "pagesAffected": 30,
+      "totalPages": 157
+    },
+    {
+      "pageType": "Blog Post",
+      "violationId": "WCAG2AA.Principle1.Guideline1_3.1_3_1.F68",
+      "pagesAffected": 30,
+      "totalPages": 157
+    },
+    {
+      "pageType": "Blog Post",
+      "violationId": "WCAG2AA.Principle1.Guideline1_1.1_1_1.H37",
+      "pagesAffected": 30,
+      "totalPages": 157
+    },
+    {
+      "pageType": "Exhibition Page",
+      "violationId": "document-title",
+      "pagesAffected": 100,
+      "totalPages": 124
+    },
+    {
+      "pageType": "Exhibition Page",
+      "violationId": "html-has-lang",
+      "pagesAffected": 100,
+      "totalPages": 124
+    },
+    {
+      "pageType": "Exhibition Page",
+      "violationId": "landmark-one-main",
+      "pagesAffected": 100,
+      "totalPages": 124
+    },
+    {
+      "pageType": "Exhibition Page",
+      "violationId": "page-has-heading-one",
+      "pagesAffected": 100,
+      "totalPages": 124
+    },
+    {
+      "pageType": "Exhibition Page",
+      "violationId": "WCAG2AA.Principle3.Guideline3_2.3_2_2.H32.2",
+      "pagesAffected": 100,
+      "totalPages": 124
+    },
+    {
+      "pageType": "Exhibition Page",
+      "violationId": "WCAG2AA.Principle1.Guideline1_4.1_4_3.G145.Fail",
+      "pagesAffected": 100,
+      "totalPages": 124
+    },
+    {
+      "pageType": "Exhibition Page",
+      "violationId": "WCAG2AA.Principle1.Guideline1_1.1_1_1.H37",
+      "pagesAffected": 100,
+      "totalPages": 124
+    },
+    {
+      "pageType": "Exhibition Page",
+      "violationId": "WCAG2AA.Principle4.Guideline4_1.4_1_2.H91.Textarea.Name",
+      "pagesAffected": 100,
+      "totalPages": 124
+    },
+    {
+      "pageType": "Exhibition Page",
+      "violationId": "WCAG2AA.Principle1.Guideline1_3.1_3_1.F68",
+      "pagesAffected": 100,
+      "totalPages": 124
+    },
+    {
+      "pageType": "Exhibition Page",
+      "violationId": "WCAG2AA.Principle2.Guideline2_4.2_4_1.H64.1",
+      "pagesAffected": 100,
+      "totalPages": 124
+    },
+    {
+      "pageType": "Static Page",
+      "violationId": "document-title",
+      "pagesAffected": 10,
+      "totalPages": 10
+    },
+    {
+      "pageType": "Static Page",
+      "violationId": "html-has-lang",
+      "pagesAffected": 10,
+      "totalPages": 10
+    },
+    {
+      "pageType": "Static Page",
+      "violationId": "landmark-one-main",
+      "pagesAffected": 10,
+      "totalPages": 10
+    },
+    {
+      "pageType": "Static Page",
+      "violationId": "page-has-heading-one",
+      "pagesAffected": 10,
+      "totalPages": 10
+    },
+    {
+      "pageType": "Static Page",
+      "violationId": "WCAG2AA.Principle3.Guideline3_2.3_2_2.H32.2",
+      "pagesAffected": 10,
+      "totalPages": 10
+    },
+    {
+      "pageType": "Static Page",
+      "violationId": "WCAG2AA.Principle4.Guideline4_1.4_1_2.H91.A.NoContent",
+      "pagesAffected": 10,
+      "totalPages": 10
+    },
+    {
+      "pageType": "Static Page",
+      "violationId": "WCAG2AA.Principle2.Guideline2_4.2_4_1.H64.1",
+      "pagesAffected": 10,
+      "totalPages": 10
+    },
+    {
+      "pageType": "Static Page",
+      "violationId": "WCAG2AA.Principle4.Guideline4_1.4_1_2.H91.Textarea.Name",
+      "pagesAffected": 10,
+      "totalPages": 10
+    },
+    {
+      "pageType": "Static Page",
+      "violationId": "WCAG2AA.Principle1.Guideline1_3.1_3_1.F68",
+      "pagesAffected": 10,
+      "totalPages": 10
+    },
+    {
+      "pageType": "Other",
+      "violationId": "document-title",
+      "pagesAffected": 7,
+      "totalPages": 7
+    },
+    {
+      "pageType": "Other",
+      "violationId": "html-has-lang",
+      "pagesAffected": 7,
+      "totalPages": 7
+    },
+    {
+      "pageType": "Other",
+      "violationId": "landmark-one-main",
+      "pagesAffected": 7,
+      "totalPages": 7
+    },
+    {
+      "pageType": "Other",
+      "violationId": "page-has-heading-one",
+      "pagesAffected": 7,
+      "totalPages": 7
+    },
+    {
+      "pageType": "Other",
+      "violationId": "WCAG2AA.Principle3.Guideline3_2.3_2_2.H32.2",
+      "pagesAffected": 7,
+      "totalPages": 7
+    },
+    {
+      "pageType": "Other",
+      "violationId": "WCAG2AA.Principle4.Guideline4_1.4_1_2.H91.InputText.Name",
+      "pagesAffected": 7,
+      "totalPages": 7
+    },
+    {
+      "pageType": "Other",
+      "violationId": "WCAG2AA.Principle1.Guideline1_3.1_3_1.F68",
+      "pagesAffected": 7,
+      "totalPages": 7
+    },
+    {
+      "pageType": "Other",
+      "violationId": "WCAG2AA.Principle2.Guideline2_4.2_4_1.H64.1",
+      "pagesAffected": 7,
+      "totalPages": 7
+    },
+    {
+      "pageType": "Product Page",
+      "violationId": "document-title",
+      "pagesAffected": 5,
+      "totalPages": 5
+    },
+    {
+      "pageType": "Product Page",
+      "violationId": "html-has-lang",
+      "pagesAffected": 5,
+      "totalPages": 5
+    },
+    {
+      "pageType": "Product Page",
+      "violationId": "landmark-one-main",
+      "pagesAffected": 5,
+      "totalPages": 5
+    },
+    {
+      "pageType": "Product Page",
+      "violationId": "page-has-heading-one",
+      "pagesAffected": 5,
+      "totalPages": 5
+    },
+    {
+      "pageType": "Product Page",
+      "violationId": "WCAG2AA.Principle3.Guideline3_2.3_2_2.H32.2",
+      "pagesAffected": 5,
+      "totalPages": 5
+    },
+    {
+      "pageType": "Product Page",
+      "violationId": "WCAG2AA.Principle4.Guideline4_1.4_1_2.H91.InputText.Name",
+      "pagesAffected": 5,
+      "totalPages": 5
+    },
+    {
+      "pageType": "Product Page",
+      "violationId": "WCAG2AA.Principle1.Guideline1_3.1_3_1.F68",
+      "pagesAffected": 5,
+      "totalPages": 5
+    },
+    {
+      "pageType": "Product Page",
+      "violationId": "WCAG2AA.Principle4.Guideline4_1.4_1_2.H91.Textarea.Name",
+      "pagesAffected": 5,
+      "totalPages": 5
+    },
+    {
+      "pageType": "Product Page",
+      "violationId": "WCAG2AA.Principle2.Guideline2_4.2_4_1.H64.1",
+      "pagesAffected": 5,
+      "totalPages": 5
+    },
+    {
+      "pageType": "Unknown",
+      "violationId": "document-title",
+      "pagesAffected": 1,
+      "totalPages": 1
+    },
+    {
+      "pageType": "Unknown",
+      "violationId": "html-has-lang",
+      "pagesAffected": 1,
+      "totalPages": 1
+    },
+    {
+      "pageType": "Unknown",
+      "violationId": "landmark-one-main",
+      "pagesAffected": 1,
+      "totalPages": 1
+    },
+    {
+      "pageType": "Unknown",
+      "violationId": "page-has-heading-one",
+      "pagesAffected": 1,
+      "totalPages": 1
+    },
+    {
+      "pageType": "Unknown",
+      "violationId": "WCAG2AA.Principle3.Guideline3_2.3_2_2.H32.2",
+      "pagesAffected": 1,
+      "totalPages": 1
+    },
+    {
+      "pageType": "Unknown",
+      "violationId": "WCAG2AA.Principle2.Guideline2_4.2_4_1.H64.1",
+      "pagesAffected": 1,
+      "totalPages": 1
+    },
+    {
+      "pageType": "Unknown",
+      "violationId": "WCAG2AA.Principle4.Guideline4_1.4_1_2.H91.Textarea.Name",
+      "pagesAffected": 1,
+      "totalPages": 1
+    },
+    {
+      "pageType": "Unknown",
+      "violationId": "WCAG2AA.Principle1.Guideline1_3.1_3_1.F68",
+      "pagesAffected": 1,
+      "totalPages": 1
+    }
+  ],
+  "durationSeconds": 697
+}
