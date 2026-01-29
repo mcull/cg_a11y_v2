@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase';
 import { AuditFilters } from '@/components/audits/audit-filters';
 import { StatusBadge } from '@/components/audits/status-badge';
+import { LocalTimestamp } from '@/components/ui/local-timestamp';
 
 export const dynamic = 'force-dynamic';
 import {
@@ -71,7 +72,7 @@ export default async function AuditsPage({ searchParams }: AuditsPageProps) {
                         href={`/audits/${audit.id}`}
                         className="text-blue-600 hover:underline"
                       >
-                        {new Date(audit.timestamp).toLocaleString()}
+                        <LocalTimestamp timestamp={audit.timestamp} />
                       </Link>
                     </TableCell>
                     <TableCell>
