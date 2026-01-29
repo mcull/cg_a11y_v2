@@ -26,10 +26,9 @@ function createWindow() {
 
   mainWindow.loadFile('renderer/index.html');
 
-  // Open DevTools in development
-  if (process.env.NODE_ENV === 'development') {
-    mainWindow.webContents.openDevTools();
-  }
+  // Open DevTools for debugging
+  // TODO: Remove this in final production build
+  mainWindow.webContents.openDevTools();
 }
 
 app.whenReady().then(() => {

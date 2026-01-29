@@ -129,10 +129,15 @@ saveSettingsBtn.addEventListener('click', async () => {
 
 // Run audit
 runAuditBtn.addEventListener('click', async () => {
-  if (isRunning) return;
+  console.log('Run Audit button clicked');
+  if (isRunning) {
+    console.log('Audit already running, ignoring click');
+    return;
+  }
 
   // Check if settings are configured
   if (!settings.supabaseUrl || !settings.supabaseKey) {
+    console.log('Settings not configured');
     showStatus('Please configure your Supabase settings first', 'error');
     settingsSection.style.display = 'block';
     return;
@@ -140,6 +145,7 @@ runAuditBtn.addEventListener('click', async () => {
 
   // Hardcoded URL for Creative Growth
   const url = 'https://creativegrowth.org';
+  console.log('Starting audit for:', url);
 
   isRunning = true;
   runAuditBtn.disabled = true;
@@ -149,7 +155,9 @@ runAuditBtn.addEventListener('click', async () => {
   statusMessage.style.display = 'none';
 
   try {
+    console.log('Calling electronAPI.runAudit...');
     const result = await window.electronAPI.runAudit(url);
+    console.log('Audit result:', result);
 
     if (result.success) {
       showStatus('✓ Audit completed successfully!', 'success');
@@ -169,9 +177,11 @@ runAuditBtn.addEventListener('click', async () => {
       progressSection.style.display = 'none';
     }
   } catch (error) {
+    console.error('Audit error:', error);
     showStatus(`✗ Audit failed: ${error.message}`, 'error');
     progressSection.style.display = 'none';
   } finally {
+    console.log('Audit finished, resetting UI');
     isRunning = false;
     runAuditBtn.disabled = false;
     btnText.style.display = 'inline';
