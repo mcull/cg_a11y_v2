@@ -10,20 +10,31 @@ export async function classifyViolation(
 ) {
   const supabase = getSupabaseClient();
 
-  // First, try to update existing classification
-  const { error: updateError } = await supabase
+  // Check if classification already exists
+  const { data: existing } = await supabase
     .from('classifications')
-    .update({
-      category,
-      auto_classified: false,
-      notes: notes || `Manually classified as ${category}`,
-      classified_at: new Date().toISOString(),
-    })
-    .eq('violation_id', violationId);
+    .select('id')
+    .eq('violation_id', violationId)
+    .maybeSingle();
 
-  // If no rows were updated, insert a new one
-  if (updateError?.code === 'PGRST116') {
-    const { error: insertError } = await supabase.from('classifications').insert({
+  if (existing) {
+    // Update existing classification
+    const { error } = await supabase
+      .from('classifications')
+      .update({
+        category,
+        auto_classified: false,
+        notes: notes || `Manually classified as ${category}`,
+        classified_at: new Date().toISOString(),
+      })
+      .eq('violation_id', violationId);
+
+    if (error) {
+      throw new Error(`Failed to update classification: ${error.message}`);
+    }
+  } else {
+    // Insert new classification
+    const { error } = await supabase.from('classifications').insert({
       violation_id: violationId,
       category,
       auto_classified: false,
@@ -31,17 +42,9 @@ export async function classifyViolation(
       classified_at: new Date().toISOString(),
     });
 
-    if (insertError) {
-      throw new Error(`Failed to classify violation: ${insertError.message}`);
+    if (error) {
+      throw new Error(`Failed to insert classification: ${error.message}`);
     }
-  } else if (updateError) {
-    throw new Error(`Failed to classify violation: ${updateError.message}`);
-  }
-
-  const error = null; // For backwards compatibility with code below
-
-  if (error) {
-    throw new Error(`Failed to classify violation: ${error.message}`);
   }
 
   // Revalidate the violations page to show updated classification

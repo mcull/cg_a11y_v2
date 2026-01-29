@@ -42,22 +42,10 @@ export default async function ViolationsPage({ params }: ViolationsPageProps) {
     notFound();
   }
 
-  // Fetch violations with classifications
+  // Fetch violations
   const { data: violations, error: violationsError } = await supabase
     .from('violations')
-    .select(`
-      *,
-      classifications (
-        category,
-        auto_classified,
-        notes
-      ),
-      violation_examples (
-        url,
-        html_snippet,
-        css_selector
-      )
-    `)
+    .select('*')
     .eq('page_type_id', pageTypeId)
     .order('severity', { ascending: true });
 
@@ -65,8 +53,28 @@ export default async function ViolationsPage({ params }: ViolationsPageProps) {
     throw new Error(`Failed to fetch violations: ${violationsError.message}`);
   }
 
+  // Fetch classifications separately
+  const violationIds = violations?.map((v) => v.id) || [];
+  const { data: classifications } = await supabase
+    .from('classifications')
+    .select('*')
+    .in('violation_id', violationIds);
+
+  // Fetch examples separately
+  const { data: examples } = await supabase
+    .from('violation_examples')
+    .select('*')
+    .in('violation_id', violationIds);
+
+  // Merge the data
+  const violationsWithData = violations?.map((violation) => ({
+    ...violation,
+    classifications: classifications?.filter((c) => c.violation_id === violation.id) || [],
+    violation_examples: examples?.filter((e) => e.violation_id === violation.id) || [],
+  }));
+
   const severityOrder: Record<string, number> = { critical: 1, serious: 2, moderate: 3, minor: 4 };
-  const sortedViolations = violations?.sort(
+  const sortedViolations = violationsWithData?.sort(
     (a, b) => (severityOrder[a.severity] || 99) - (severityOrder[b.severity] || 99)
   );
 
