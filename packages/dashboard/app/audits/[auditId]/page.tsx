@@ -157,7 +157,7 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
               <p className="text-sm text-muted-foreground">Content Issues</p>
               {contentViolations > 0 ? (
                 <Link
-                  href={`/audits/${auditId}/violations/content`}
+                  href={`/audits/${auditId}/categories/content`}
                   className="text-2xl font-semibold text-blue-600 hover:underline"
                 >
                   {contentViolations.toLocaleString()}
@@ -170,7 +170,7 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
               <p className="text-sm text-muted-foreground">Structural Issues</p>
               {structuralViolations > 0 ? (
                 <Link
-                  href={`/audits/${auditId}/violations/structural`}
+                  href={`/audits/${auditId}/categories/structural`}
                   className="text-2xl font-semibold text-purple-600 hover:underline"
                 >
                   {structuralViolations.toLocaleString()}
