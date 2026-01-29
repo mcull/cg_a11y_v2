@@ -48,7 +48,9 @@ export function StatusBadge({ status, timestamp }: StatusBadgeProps) {
           {config.label} {timeStr}
         </Badge>
         {isStuck && (
-          <AlertTriangle className="w-4 h-4 text-red-600" title="Audit may be stuck" />
+          <span title="Audit may be stuck">
+            <AlertTriangle className="w-4 h-4 text-red-600" />
+          </span>
         )}
       </div>
     );
