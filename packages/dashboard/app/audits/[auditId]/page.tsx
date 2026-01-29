@@ -62,6 +62,42 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
     throw new Error(`Failed to fetch page types: ${pageTypesError.message}`);
   }
 
+  // Fetch classification breakdown
+  const { data: classificationData, error: classificationError } = await supabase
+    .from('violations')
+    .select(`
+      id,
+      extrapolated_total,
+      classifications (
+        category
+      )
+    `)
+    .eq('audit_id', auditId);
+
+  if (classificationError) {
+    throw new Error(`Failed to fetch classifications: ${classificationError.message}`);
+  }
+
+  // Calculate classification breakdown
+  let contentViolations = 0;
+  let structuralViolations = 0;
+  let unclassifiedViolations = 0;
+
+  classificationData?.forEach((violation: any) => {
+    const total = violation.extrapolated_total || 0;
+    const classification = Array.isArray(violation.classifications) && violation.classifications[0];
+
+    if (classification) {
+      if (classification.category === 'content') {
+        contentViolations += total;
+      } else if (classification.category === 'structural') {
+        structuralViolations += total;
+      }
+    } else {
+      unclassifiedViolations += total;
+    }
+  });
+
   // Calculate violation totals for each page type
   const pageTypesWithCounts = pageTypes?.map((pageType) => {
     const violations = Array.isArray(pageType.violations) ? pageType.violations : [];
@@ -104,16 +140,29 @@ export default async function AuditDetailPage({ params }: AuditDetailPageProps) 
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Duration</p>
               <p className="text-2xl font-semibold">{audit.duration_seconds || 0}s</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Total Violations (Extrapolated)</p>
+              <p className="text-sm text-muted-foreground">Total Violations</p>
               <p className="text-2xl font-semibold">{totalViolationsFound.toLocaleString()}</p>
             </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Content Issues</p>
+              <p className="text-2xl font-semibold text-blue-600">{contentViolations.toLocaleString()}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Structural Issues</p>
+              <p className="text-2xl font-semibold text-purple-600">{structuralViolations.toLocaleString()}</p>
+            </div>
           </div>
+          {unclassifiedViolations > 0 && (
+            <p className="text-sm text-muted-foreground mt-4">
+              {unclassifiedViolations.toLocaleString()} violations not yet classified
+            </p>
+          )}
         </CardContent>
       </Card>
 
