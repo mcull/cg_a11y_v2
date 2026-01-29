@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { getSupabaseClient } from '@/lib/supabase';
 import { AuditFilters } from '@/components/audits/audit-filters';
 import { StatusBadge } from '@/components/audits/status-badge';
@@ -47,6 +48,53 @@ export default async function AuditsPage({ searchParams }: AuditsPageProps) {
 
   return (
     <div className="container mx-auto py-8">
+      {/* Header Section with Logos */}
+      <div className="mb-8 flex items-start justify-between gap-8">
+        <div className="flex-shrink-0">
+          <Image
+            src="/cglogo.png"
+            alt="Creative Growth"
+            width={180}
+            height={80}
+            className="h-auto w-auto"
+            priority
+          />
+        </div>
+
+        <div className="flex-1">
+          <div className="flex items-start gap-4">
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                These accessibility audits are powered by{' '}
+                <a
+                  href="https://www.deque.com/axe/axe-core/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-foreground hover:underline"
+                >
+                  Deque's axe-core
+                </a>{' '}
+                testing engine. Axe-core's rules library is constantly updated and covers WCAG 2.0, 2.1, and 2.2 at levels A, AA, and AAA. The testing engine also adheres to rules outlined in global accessibility standards and regulations such as Section 508, EN 301 549, RGAA, and ADA, enabling you to ensure you're meeting all your compliance requirements.
+              </p>
+            </div>
+            <a
+              href="https://www.deque.com/axe/axe-core/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0"
+            >
+              <Image
+                src="/deque-logo.svg"
+                alt="Deque Systems"
+                width={120}
+                height={40}
+                className="h-auto w-auto"
+              />
+            </a>
+          </div>
+        </div>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Accessibility Audits</CardTitle>
