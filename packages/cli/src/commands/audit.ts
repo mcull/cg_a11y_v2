@@ -83,9 +83,9 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     // Sample and test each page type
     console.log('\n🔬 Testing pages with adaptive sampling...');
     const sampler = new AdaptiveSampler({
-      initialSampleSize: 10,
-      maxSampleSize: 25,
-      consistencyThreshold: 0.9,
+      initialSampleSize: 30,
+      maxSampleSize: 100,
+      consistencyThreshold: 0.95,
     });
 
     const allViolations: any[] = [];
@@ -134,6 +134,7 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     await runner.close();
 
     // Save page types and violations to database
+    let totalViolationsCount = 0;
     if (repository && auditId) {
       console.log('\n💾 Saving results to database...');
 
@@ -166,6 +167,9 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
 
         // Save unique violations for this page type
         for (const [violationId, { violation, urls }] of violationMap) {
+          const extrapolatedTotal = Math.round((urls.length / pageTypeSampleCounts.get(pageType.type)!) * pageType.totalCount);
+          totalViolationsCount += extrapolatedTotal;
+
           const savedViolation = await repository.saveViolation({
             audit_id: auditId,
             page_type_id: savedPageType.id,
@@ -175,7 +179,7 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
             severity: (violation.impact as 'critical' | 'serious' | 'moderate' | 'minor') || 'serious',
             description: violation.description || violation.help || 'No description available',
             instances_found: urls.length,
-            extrapolated_total: Math.round((urls.length / pageTypeSampleCounts.get(pageType.type)!) * pageType.totalCount),
+            extrapolated_total: extrapolatedTotal,
             remediation_guidance: violation.helpUrl || null,
           });
 
@@ -207,8 +211,9 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
     // Update audit status if using database
     if (repository && auditId) {
       const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
-      await repository.updateAuditStatus(auditId, 'completed', durationSeconds);
+      await repository.updateAuditStatus(auditId, 'completed', durationSeconds, totalViolationsCount);
       console.log(`\n✅ Audit completed and saved to database (${durationSeconds}s)`);
+      console.log(`   Total violations (extrapolated): ${totalViolationsCount.toLocaleString()}`);
     }
 
     // Save results

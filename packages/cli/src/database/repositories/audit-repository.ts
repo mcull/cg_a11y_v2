@@ -29,11 +29,15 @@ export class AuditRepository {
   async updateAuditStatus(
     auditId: string,
     status: 'running' | 'completed' | 'failed',
-    durationSeconds?: number
+    durationSeconds?: number,
+    totalViolations?: number
   ): Promise<Audit> {
     const updates: any = { status };
     if (durationSeconds !== undefined) {
       updates.duration_seconds = durationSeconds;
+    }
+    if (totalViolations !== undefined) {
+      updates.total_violations = totalViolations;
     }
 
     const { data: audit, error } = await this.client
