@@ -207,14 +207,40 @@ function showConnectionStatus(message, type) {
 }
 
 function showProgress(message) {
+  console.log('Progress message:', message.substring(0, 100)); // Log first 100 chars
+
   // Handle screenshot messages
   if (message.startsWith('SCREENSHOT:')) {
+    console.log('Screenshot received, length:', message.length);
     const imageData = message.replace('SCREENSHOT:', '');
     const screenshotPreview = document.getElementById('screenshot-preview');
     const screenshotImg = document.getElementById('screenshot-img');
 
-    screenshotImg.src = imageData;
-    screenshotPreview.style.display = 'block';
+    console.log('Elements found:', { preview: !!screenshotPreview, img: !!screenshotImg });
+
+    // Log full data URL for manual testing - you can copy this and paste in browser address bar
+    console.log('Full screenshot data URL:', imageData);
+
+    if (screenshotImg) {
+      screenshotImg.src = imageData;
+      console.log('Image src set to:', imageData.substring(0, 50) + '...');
+
+      // Force a reflow to ensure browser processes the change
+      void screenshotImg.offsetWidth;
+
+      // Check if image loaded
+      screenshotImg.onload = () => {
+        console.log('✓ Image loaded successfully! Dimensions:', screenshotImg.naturalWidth, 'x', screenshotImg.naturalHeight);
+      };
+      screenshotImg.onerror = (err) => {
+        console.error('✗ Image failed to load:', err);
+      };
+    }
+
+    if (screenshotPreview) {
+      screenshotPreview.style.display = 'block';
+      console.log('Preview display set to block');
+    }
     return;
   }
 

@@ -111,8 +111,11 @@ export async function auditCommand(options: AuditOptions): Promise<void> {
         try {
           const merged = await runner.testUrlAndMerge(url, (screenshot) => {
             // Send screenshot through progress callback
+            console.log('Screenshot captured, sending to UI (length:', screenshot.length, ')');
             if (options.onProgress) {
               options.onProgress(`SCREENSHOT:${screenshot}`);
+            } else {
+              console.log('WARNING: No onProgress callback available');
             }
           });
           // Store full violation objects WITH their source URL

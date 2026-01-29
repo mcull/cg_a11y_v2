@@ -34,24 +34,16 @@ export class AxeTester {
     const page = await this.browser.newPage();
 
     try {
+      // Set a reasonable viewport size for screenshots
+      await page.setViewport({ width: 1280, height: 800 });
+
       await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
 
-      // Capture screenshot if callback provided
-      if (onScreenshot) {
-        try {
-          const screenshot = await page.screenshot({
-            encoding: 'base64',
-            type: 'jpeg',
-            quality: 50,
-            fullPage: false
-          });
-          onScreenshot(`data:image/jpeg;base64,${screenshot}`);
-        } catch (err) {
-          // Ignore screenshot errors, continue with audit
-        }
-      }
-
+      // Run the accessibility audit
       return await this.runAxe(page, url);
+
+      // TODO: Screenshot feature disabled for now - headless Chrome rendering issues
+      // Can re-enable later if needed
     } finally {
       await page.close();
     }

@@ -47,6 +47,7 @@ header {
   color: #2a2a23;
   padding: 32px;
   text-align: center;
+  -webkit-app-region: drag; /* Make header draggable */
 }
 
 header h1 {
