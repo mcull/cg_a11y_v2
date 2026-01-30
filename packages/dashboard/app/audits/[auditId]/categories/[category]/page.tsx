@@ -166,7 +166,14 @@ export default async function ViolationsByCategoryPage({ params }: ViolationsByC
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
                       <span className="font-medium">Remediation: </span>
-                      {violation.remediation_guidance}
+                      <a
+                        href={violation.remediation_guidance}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline break-all"
+                      >
+                        {violation.remediation_guidance}
+                      </a>
                     </p>
                   </CardContent>
                 )}

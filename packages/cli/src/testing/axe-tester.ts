@@ -7,8 +7,13 @@ export class AxeTester {
 
   async init(): Promise<void> {
     const launchOptions: any = {
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: 'new', // Use new headless mode with better rendering
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--force-color-profile=srgb', // Ensure color rendering
+        '--disable-web-security', // Allow all resources to load
+      ],
     };
 
     // Use custom Chrome path if provided
@@ -37,13 +42,32 @@ export class AxeTester {
       // Set a reasonable viewport size for screenshots
       await page.setViewport({ width: 1280, height: 800 });
 
+      // Set a realistic user agent to avoid bot detection
+      await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
       await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
 
-      // Run the accessibility audit
-      return await this.runAxe(page, url);
+      // Run the accessibility audit first
+      const result = await this.runAxe(page, url);
 
-      // TODO: Screenshot feature disabled for now - headless Chrome rendering issues
-      // Can re-enable later if needed
+      // Capture screenshot after audit (page is fully rendered)
+      if (onScreenshot) {
+        try {
+          const screenshot = await page.screenshot({
+            encoding: 'base64',
+            type: 'jpeg',
+            quality: 60,
+            fullPage: false,
+            omitBackground: false, // Include background colors/images
+          });
+          console.log(`Screenshot captured for ${url}, size: ${screenshot.length} bytes`);
+          onScreenshot(`data:image/jpeg;base64,${screenshot}`);
+        } catch (err) {
+          console.error('Screenshot error:', err);
+        }
+      }
+
+      return result;
     } finally {
       await page.close();
     }

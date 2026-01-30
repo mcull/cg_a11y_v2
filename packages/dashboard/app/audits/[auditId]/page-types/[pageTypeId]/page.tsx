@@ -218,9 +218,14 @@ export default async function ViolationsPage({ params }: ViolationsPageProps) {
                           <p className="text-sm font-medium mb-1">
                             Remediation Guidance:
                           </p>
-                          <p className="text-sm text-muted-foreground">
+                          <a
+                            href={violation.remediation_guidance}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary hover:underline break-all"
+                          >
                             {violation.remediation_guidance}
-                          </p>
+                          </a>
                         </div>
                       )}
                     </CardContent>

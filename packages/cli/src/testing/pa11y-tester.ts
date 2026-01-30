@@ -23,8 +23,13 @@ export class Pa11yTester {
 
   async init(): Promise<void> {
     const launchOptions: any = {
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: 'new', // Use new headless mode with better rendering
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--force-color-profile=srgb',
+        '--disable-web-security',
+      ],
     };
 
     // Use custom Chrome path if provided
