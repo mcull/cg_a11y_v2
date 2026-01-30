@@ -109,7 +109,7 @@ export class Pa11yTester {
       impact: impactMap[issue.type] || 'minor',
       description: issue.message,
       help: issue.message,
-      helpUrl: `https://www.w3.org/WAI/WCAG21/Understanding/${issue.code}`,
+      helpUrl: undefined, // Pa11y doesn't provide helpUrls, and we can't reliably construct them from issue codes
       tags: issue.type ? [issue.type] : [],
       nodes: [
         {
